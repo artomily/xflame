@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  /* Flame Protocol — xflame */
+  --color-brand:         oklch(0.71 0.25 32);
+  --color-brand-soft:    oklch(0.83 0.19 32);
+  --color-brand-fg:      oklch(0.10 0 0);
+  --color-canvas:        oklch(0.10 0.01 32);
+  --color-surface:       oklch(0.15 0.015 32);
+  --color-surface-mid:   oklch(0.19 0.02 32);
+  --color-ink:           oklch(0.97 0.01 40);
+  --color-ink-muted:     oklch(0.62 0.01 40);
+  --color-edge:          oklch(0.23 0.015 32);
+  --color-success:       oklch(0.72 0.18 150);
+  --color-danger:        oklch(0.65 0.22 25);
+}

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brand palette — xflame</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", Inter, sans-serif; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html[data-theme="dark"] body { background: #0a0a0a; color: #f5f5f5; }
+    html[data-theme="light"] body { background: #f5f5f5; color: #0a0a0a; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(12px);
+      background: color-mix(in oklch, currentColor 6%, transparent);
+      border-bottom: 1px solid color-mix(in oklch, currentColor 12%, transparent);
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+    .topbar .hint { font-size: 13px; opacity: 0.6; margin: 4px 0 0; }
+    .topbar .toggle {
+      border: 1px solid color-mix(in oklch, currentColor 18%, transparent);
+      background: transparent; color: inherit;
+      padding: 6px 12px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; font-family: inherit;
+    }
+    .topbar .toggle:hover { background: color-mix(in oklch, currentColor 6%, transparent); }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; display: grid; gap: 40px; }
+
+    .palette {
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.12);
+      background: var(--bg); color: var(--fg);
+      transition: background 200ms ease, color 200ms ease;
+    }
+    .palette-header {
+      padding: 20px 24px 12px;
+      display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .palette-number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 999px;
+      background: var(--primary); color: var(--primary-fg);
+      font-weight: 600; font-size: 13px; margin-right: 10px; flex-shrink: 0;
+    }
+    .palette-name { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+    .palette-vibe { font-size: 12px; opacity: 0.6; margin: 4px 0 0; font-variant: all-small-caps; letter-spacing: 0.06em; }
+
+    .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); }
+    .swatch { aspect-ratio: 2/1; position: relative; }
+    .swatch-label {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 5px 6px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9px;
+      background: rgba(0,0,0,0.45); color: #fff; text-align: center; letter-spacing: 0.02em;
+    }
+
+    .ui { padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 720px) { .ui { grid-template-columns: 1fr; } }
+
+    .headline { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 6px; }
+    .body-text { font-size: 14px; line-height: 1.55; margin: 0 0 16px; opacity: 0.88; }
+    .muted { font-size: 12px; opacity: 0.6; margin: 0; }
+
+    .buttons { display: flex; gap: 8px; margin-bottom: 0; flex-wrap: wrap; }
+    .btn {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 8px 14px; border-radius: 8px; border: 1px solid transparent;
+      cursor: pointer; transition: opacity 150ms ease;
+    }
+    .btn-primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
+    .btn-secondary:hover { background: var(--muted); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; color: var(--card-fg);
+    }
+    .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin: 0 0 5px; }
+    .card-value { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; margin: 0; }
+    .card-sub { font-size: 11px; opacity: 0.6; margin: 3px 0 0; }
+
+    .swap-input {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 6px;
+    }
+    .swap-row { display: flex; align-items: center; justify-content: space-between; }
+    .swap-amount { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; color: var(--fg); }
+    .swap-token { font-size: 12px; opacity: 0.55; background: var(--muted); border-radius: 6px; padding: 4px 8px; }
+
+    .contrast {
+      padding: 12px 24px; border-top: 1px solid var(--border);
+      background: var(--card); color: var(--muted-fg);
+      font-size: 11px; display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .contrast span::before { content: "✓ "; color: #22c55e; font-weight: 700; }
+
+    .footer-cta { text-align: center; padding: 24px; opacity: 0.65; font-size: 14px; }
+    .footer-cta code {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      background: color-mix(in oklch, currentColor 10%, transparent);
+      padding: 2px 6px; border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>Brand palette — xflame</h1>
+      <p class="hint">DeFi · Stellar swap UI · warm mood</p>
+    </div>
+    <button class="toggle" id="theme-toggle">Switch to Light</button>
+  </div>
+
+  <div class="container">
+
+    <!-- ═══════════════════ 1. SUNSET TRADE (curated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.13 0.01 30);--fg:oklch(0.97 0.01 60);--card:oklch(0.18 0.02 30);--card-fg:oklch(0.97 0.01 60);--primary:oklch(0.70 0.19 40);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.20 0.02 30);--muted-fg:oklch(0.67 0.01 60);--border:oklch(0.26 0.02 30);--ring:oklch(0.70 0.19 40);"
+      data-light="--bg:oklch(0.98 0.01 30);--fg:oklch(0.18 0.02 30);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.02 30);--primary:oklch(0.52 0.19 40);--primary-fg:oklch(0.98 0 0);--muted:oklch(0.94 0.01 30);--muted-fg:oklch(0.48 0.02 30);--border:oklch(0.90 0.01 30);--ring:oklch(0.52 0.19 40);"
+      style="--bg:oklch(0.13 0.01 30);--fg:oklch(0.97 0.01 60);--card:oklch(0.18 0.02 30);--card-fg:oklch(0.97 0.01 60);--primary:oklch(0.70 0.19 40);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.20 0.02 30);--muted-fg:oklch(0.67 0.01 60);--border:oklch(0.26 0.02 30);--ring:oklch(0.70 0.19 40);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">1</span>Sunset Trade</h2>
+          <p class="palette-vibe">defi · warm · bold · energetic</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#15100D"><span class="swatch-label">#15100D</span></div>
+        <div class="swatch" style="background:#1F1712"><span class="swatch-label">#1F1712</span></div>
+        <div class="swatch" style="background:#EC7A3A"><span class="swatch-label">#EC7A3A</span></div>
+        <div class="swatch" style="background:#F5A877"><span class="swatch-label">#F5A877</span></div>
+        <div class="swatch" style="background:#F6F3EE"><span class="swatch-label">#F6F3EE</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 14.8:1</span>
+        <span>Primary 7.6:1</span>
+        <span>Muted 6.2:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <!-- ═══════════════════ 2. GILDED NIGHT (curated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.11 0.005 60);--fg:oklch(0.96 0.01 60);--card:oklch(0.16 0.008 60);--card-fg:oklch(0.96 0.01 60);--primary:oklch(0.78 0.14 85);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.18 0.008 60);--muted-fg:oklch(0.66 0.01 60);--border:oklch(0.24 0.01 60);--ring:oklch(0.78 0.14 85);"
+      data-light="--bg:oklch(0.98 0.005 60);--fg:oklch(0.18 0.01 60);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.01 60);--primary:oklch(0.55 0.14 85);--primary-fg:oklch(0.12 0 0);--muted:oklch(0.94 0.005 60);--muted-fg:oklch(0.48 0.01 60);--border:oklch(0.90 0.005 60);--ring:oklch(0.55 0.14 85);"
+      style="--bg:oklch(0.11 0.005 60);--fg:oklch(0.96 0.01 60);--card:oklch(0.16 0.008 60);--card-fg:oklch(0.96 0.01 60);--primary:oklch(0.78 0.14 85);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.18 0.008 60);--muted-fg:oklch(0.66 0.01 60);--border:oklch(0.24 0.01 60);--ring:oklch(0.78 0.14 85);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">2</span>Gilded Night</h2>
+          <p class="palette-vibe">premium · bold · warm · dark gold</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#0C0B08"><span class="swatch-label">#0C0B08</span></div>
+        <div class="swatch" style="background:#16140F"><span class="swatch-label">#16140F</span></div>
+        <div class="swatch" style="background:#D6B864"><span class="swatch-label">#D6B864</span></div>
+        <div class="swatch" style="background:#E9D89C"><span class="swatch-label">#E9D89C</span></div>
+        <div class="swatch" style="background:#F3F1EC"><span class="swatch-label">#F3F1EC</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 15.4:1</span>
+        <span>Primary 9.1:1</span>
+        <span>Muted 6.8:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <!-- ═══════════════════ 3. AMBER MONITOR (curated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.14 0.01 70);--fg:oklch(0.96 0.01 70);--card:oklch(0.19 0.015 70);--card-fg:oklch(0.96 0.01 70);--primary:oklch(0.78 0.15 70);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.21 0.015 70);--muted-fg:oklch(0.66 0.01 70);--border:oklch(0.27 0.015 70);--ring:oklch(0.78 0.15 70);"
+      data-light="--bg:oklch(0.98 0.008 70);--fg:oklch(0.18 0.015 70);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.015 70);--primary:oklch(0.54 0.15 70);--primary-fg:oklch(0.12 0 0);--muted:oklch(0.94 0.008 70);--muted-fg:oklch(0.48 0.015 70);--border:oklch(0.90 0.008 70);--ring:oklch(0.54 0.15 70);"
+      style="--bg:oklch(0.14 0.01 70);--fg:oklch(0.96 0.01 70);--card:oklch(0.19 0.015 70);--card-fg:oklch(0.96 0.01 70);--primary:oklch(0.78 0.15 70);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.21 0.015 70);--muted-fg:oklch(0.66 0.01 70);--border:oklch(0.27 0.015 70);--ring:oklch(0.78 0.15 70);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">3</span>Amber Monitor</h2>
+          <p class="palette-vibe">technical · warm · serious · amber glow</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#110F0A"><span class="swatch-label">#110F0A</span></div>
+        <div class="swatch" style="background:#1A1711"><span class="swatch-label">#1A1711</span></div>
+        <div class="swatch" style="background:#D9A452"><span class="swatch-label">#D9A452</span></div>
+        <div class="swatch" style="background:#E8C389"><span class="swatch-label">#E8C389</span></div>
+        <div class="swatch" style="background:#F3F1ED"><span class="swatch-label">#F3F1ED</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 13.2:1</span>
+        <span>Primary 8.8:1</span>
+        <span>Muted 6.1:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <!-- ═══════════════════ 4. MAGMA PROTOCOL (generated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.11 0.015 22);--fg:oklch(0.97 0.01 35);--card:oklch(0.16 0.02 22);--card-fg:oklch(0.97 0.01 35);--primary:oklch(0.72 0.23 22);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.18 0.02 22);--muted-fg:oklch(0.67 0.01 35);--border:oklch(0.24 0.02 22);--ring:oklch(0.72 0.23 22);"
+      data-light="--bg:oklch(0.98 0.01 22);--fg:oklch(0.18 0.02 22);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.02 22);--primary:oklch(0.52 0.23 22);--primary-fg:oklch(0.98 0 0);--muted:oklch(0.94 0.01 22);--muted-fg:oklch(0.48 0.02 22);--border:oklch(0.90 0.01 22);--ring:oklch(0.52 0.23 22);"
+      style="--bg:oklch(0.11 0.015 22);--fg:oklch(0.97 0.01 35);--card:oklch(0.16 0.02 22);--card-fg:oklch(0.97 0.01 35);--primary:oklch(0.72 0.23 22);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.18 0.02 22);--muted-fg:oklch(0.67 0.01 35);--border:oklch(0.24 0.02 22);--ring:oklch(0.72 0.23 22);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">4</span>Magma Protocol</h2>
+          <p class="palette-vibe">defi · bold · warm · orange-red · high chroma</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#130805"><span class="swatch-label">#130805</span></div>
+        <div class="swatch" style="background:#1E0E09"><span class="swatch-label">#1E0E09</span></div>
+        <div class="swatch" style="background:#F06033"><span class="swatch-label">#F06033</span></div>
+        <div class="swatch" style="background:#F59070"><span class="swatch-label">#F59070</span></div>
+        <div class="swatch" style="background:#F5F2EE"><span class="swatch-label">#F5F2EE</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 16.1:1</span>
+        <span>Primary 7.4:1</span>
+        <span>Muted 6.5:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <!-- ═══════════════════ 5. AMBER SWAP (generated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.12 0.01 48);--fg:oklch(0.97 0.01 48);--card:oklch(0.17 0.015 48);--card-fg:oklch(0.97 0.01 48);--primary:oklch(0.74 0.19 48);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.19 0.015 48);--muted-fg:oklch(0.67 0.01 48);--border:oklch(0.25 0.015 48);--ring:oklch(0.74 0.19 48);"
+      data-light="--bg:oklch(0.98 0.008 48);--fg:oklch(0.18 0.015 48);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.015 48);--primary:oklch(0.52 0.19 48);--primary-fg:oklch(0.12 0 0);--muted:oklch(0.94 0.008 48);--muted-fg:oklch(0.48 0.015 48);--border:oklch(0.90 0.008 48);--ring:oklch(0.52 0.19 48);"
+      style="--bg:oklch(0.12 0.01 48);--fg:oklch(0.97 0.01 48);--card:oklch(0.17 0.015 48);--card-fg:oklch(0.97 0.01 48);--primary:oklch(0.74 0.19 48);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.19 0.015 48);--muted-fg:oklch(0.67 0.01 48);--border:oklch(0.25 0.015 48);--ring:oklch(0.74 0.19 48);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">5</span>Amber Swap</h2>
+          <p class="palette-vibe">defi · warm · amber · energetic · golden</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#110F08"><span class="swatch-label">#110F08</span></div>
+        <div class="swatch" style="background:#1B1810"><span class="swatch-label">#1B1810</span></div>
+        <div class="swatch" style="background:#E09A28"><span class="swatch-label">#E09A28</span></div>
+        <div class="swatch" style="background:#EDCA72"><span class="swatch-label">#EDCA72</span></div>
+        <div class="swatch" style="background:#F4F2EC"><span class="swatch-label">#F4F2EC</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 14.6:1</span>
+        <span>Primary 8.2:1</span>
+        <span>Muted 6.0:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <!-- ═══════════════════ 6. FLAME PROTOCOL (generated) ═══════════════════ -->
+    <article class="palette"
+      data-dark="--bg:oklch(0.10 0.01 32);--fg:oklch(0.97 0.01 40);--card:oklch(0.15 0.015 32);--card-fg:oklch(0.97 0.01 40);--primary:oklch(0.71 0.25 32);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.17 0.015 32);--muted-fg:oklch(0.67 0.01 40);--border:oklch(0.23 0.015 32);--ring:oklch(0.71 0.25 32);"
+      data-light="--bg:oklch(0.98 0.008 32);--fg:oklch(0.18 0.02 32);--card:oklch(1 0 0);--card-fg:oklch(0.18 0.02 32);--primary:oklch(0.52 0.25 32);--primary-fg:oklch(0.98 0 0);--muted:oklch(0.94 0.008 32);--muted-fg:oklch(0.48 0.02 32);--border:oklch(0.90 0.008 32);--ring:oklch(0.52 0.25 32);"
+      style="--bg:oklch(0.10 0.01 32);--fg:oklch(0.97 0.01 40);--card:oklch(0.15 0.015 32);--card-fg:oklch(0.97 0.01 40);--primary:oklch(0.71 0.25 32);--primary-fg:oklch(0.10 0 0);--muted:oklch(0.17 0.015 32);--muted-fg:oklch(0.67 0.01 40);--border:oklch(0.23 0.015 32);--ring:oklch(0.71 0.25 32);">
+      <header class="palette-header">
+        <div>
+          <h2 class="palette-name"><span class="palette-number">6</span>Flame Protocol</h2>
+          <p class="palette-vibe">defi · bold · warm · pure fire · high chroma orange</p>
+        </div>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#0E0906"><span class="swatch-label">#0E0906</span></div>
+        <div class="swatch" style="background:#1A110B"><span class="swatch-label">#1A110B</span></div>
+        <div class="swatch" style="background:#F06828"><span class="swatch-label">#F06828</span></div>
+        <div class="swatch" style="background:#F59E68"><span class="swatch-label">#F59E68</span></div>
+        <div class="swatch" style="background:#F5F2EE"><span class="swatch-label">#F5F2EE</span></div>
+      </div>
+      <div class="ui">
+        <div>
+          <p class="muted" style="margin-bottom:6px;">You pay</p>
+          <div class="swap-input">
+            <div class="swap-row">
+              <span class="swap-amount">100.00</span>
+              <span class="swap-token">USDC</span>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:6px;">You receive</p>
+          <div class="swap-input" style="margin-bottom:14px;">
+            <div class="swap-row">
+              <span class="swap-amount">264.18</span>
+              <span class="swap-token">XLM</span>
+            </div>
+            <p class="card-sub" style="margin-top:4px;">1 USDC = 2.6418 XLM · 0.03% fee</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%;">Review swap</button>
+        </div>
+        <div class="card">
+          <p class="card-label">Route</p>
+          <p class="card-value" style="font-size:16px;">Soroswap</p>
+          <p class="card-sub">Direct · 0.1% slippage</p>
+          <div style="margin-top:14px;">
+            <p class="card-label">Your balance</p>
+            <p class="card-value">1,204.50 <span style="font-size:13px;opacity:0.55;">XLM</span></p>
+            <p class="card-sub">~$456.21 · +1.8% today</p>
+          </div>
+        </div>
+      </div>
+      <div class="contrast">
+        <span>Body 17.2:1</span>
+        <span>Primary 7.2:1</span>
+        <span>Muted 6.4:1</span>
+        <span>AA ✓</span>
+      </div>
+    </article>
+
+    <div class="footer-cta">
+      Pick one: type <code>1</code> through <code>6</code> in Claude Code.<br />
+      Want variations? Try <code>more like 4</code>, <code>more like 6 but darker</code>, or <code>none</code>.
+    </div>
+
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      btn.textContent = next === 'dark' ? 'Switch to Light' : 'Switch to Dark';
+      document.querySelectorAll('.palette').forEach((el) => {
+        const tokens = next === 'dark' ? el.dataset.dark : el.dataset.light;
+        if (tokens) el.setAttribute('style', tokens);
+      });
+    });
+  </script>
+</body>
+</html>
