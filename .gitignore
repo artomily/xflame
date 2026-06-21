@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment — never commit secrets
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+target/
+
+# Stellar / Soroban local state
+.soroban/
+.stellar/
+
+# Brand preview (generated artifact)
+.brand-preview/
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/settings.json
