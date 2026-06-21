@@ -2,8 +2,9 @@ import { useState, type FormEvent } from "react";
 import { type Note } from "../bindings/index.ts";
 import { connectFreighter, createContractClient } from "./stellar";
 import Faucet from "./Faucet";
+import Send from "./Send";
 
-type Tab = "notes" | "faucet";
+type Tab = "notes" | "faucet" | "send";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("notes");
@@ -62,7 +63,7 @@ export default function App() {
         <div className="mx-auto flex max-w-lg items-center justify-between px-6 py-4">
           <span className="font-semibold tracking-tight text-brand">xflame</span>
           <nav className="flex gap-1 rounded-lg border border-edge bg-surface p-1">
-            {(["notes", "faucet"] as Tab[]).map((t) => (
+            {(["notes", "faucet", "send"] as Tab[]).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -84,6 +85,8 @@ export default function App() {
       <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-6 py-10">
 
         {tab === "faucet" && <Faucet />}
+
+        {tab === "send" && <Send />}
 
         {tab === "notes" && (
           <>

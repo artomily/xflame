@@ -16,7 +16,7 @@ deploy: build
 	stellar contract deploy \
 		--network $(STELLAR_NETWORK) \
 		--source $(STELLAR_ACCOUNT) \
-		--wasm target/wasm32v1-none/release/notes.wasm
+		--wasm target/wasm32v1-none/release/vault.wasm
 
 fmt:
 	cargo fmt --all
