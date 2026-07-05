@@ -8,6 +8,7 @@ import {
 } from "@stellar/stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
 import { connectFreighter } from "./stellar";
+import Ame from "./Ame";
 
 const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
 
@@ -158,25 +159,35 @@ export default function Send() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {status === "loading" ? "Sending…" : "Send XLM"}
+              {status === "loading" ? (
+                <>
+                  <Ame size={20} mood="loading" title="" />
+                  Sending…
+                </>
+              ) : (
+                "Send XLM"
+              )}
             </button>
           </form>
         </>
       )}
 
       {status === "success" && (
-        <div className="rounded-lg border border-success/30 bg-success/10 px-4 py-3">
-          <p className="text-sm font-medium text-success">{message}</p>
-          <a
-            href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 block break-all font-mono text-xs text-success/70 underline underline-offset-2"
-          >
-            View on Stellar Expert →
-          </a>
+        <div className="flex items-center gap-3 rounded-lg border border-success/30 bg-success/10 px-4 py-3">
+          <Ame size={40} mood="happy" title="Ame is happy" className="shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-success">{message}</p>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 block break-all font-mono text-xs text-success/70 underline underline-offset-2"
+            >
+              View on Stellar Expert →
+            </a>
+          </div>
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { type Note } from "../bindings/index.ts";
 import { connectFreighter, createContractClient } from "./stellar";
 import Faucet from "./Faucet";
 import Send from "./Send";
+import Ame from "./Ame";
 
 type Tab = "notes" | "faucet" | "send";
 
@@ -60,15 +61,18 @@ export default function App() {
     <main className="min-h-svh bg-canvas text-ink">
       {/* Top nav */}
       <header className="sticky top-0 z-10 border-b border-edge bg-canvas/80 backdrop-blur">
-        <div className="mx-auto flex max-w-lg items-center justify-between px-6 py-4">
-          <span className="font-semibold tracking-tight text-brand">xflame</span>
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
+          <span className="flex items-center gap-1.5 font-semibold tracking-tight text-brand">
+            <Ame size={26} title="Ame" />
+            xflame
+          </span>
           <nav className="flex gap-1 rounded-lg border border-edge bg-surface p-1">
             {(["notes", "faucet", "send"] as Tab[]).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => { setTab(t); setError(""); }}
-                className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                className={`rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-4 ${
                   tab === t
                     ? "bg-brand text-brand-fg"
                     : "text-ink-muted hover:text-ink"
@@ -82,7 +86,7 @@ export default function App() {
       </header>
 
       {/* Page content */}
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-6 py-10">
+      <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-4 py-8 sm:px-6 sm:py-10">
 
         {tab === "faucet" && <Faucet />}
 
@@ -92,6 +96,7 @@ export default function App() {
           <>
             {!wallet ? (
               <div className="flex flex-col items-center gap-3 pt-4 text-center">
+                <Ame size={128} title="Ame waves hello" />
                 <p className="text-sm text-ink-muted">Connect your wallet to read and write on-chain notes.</p>
                 <button
                   type="button"

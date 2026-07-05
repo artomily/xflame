@@ -14,3 +14,29 @@
   --color-success:       oklch(0.45 0.18 150);
   --color-danger:        oklch(0.55 0.22 25);
 }
+
+/* Ame the dino — mascot motion */
+@keyframes ame-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6%); }
+}
+@keyframes ame-flame {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(1.16); }
+}
+.ame-bob {
+  animation: ame-bob 2.2s ease-in-out infinite;
+}
+.ame-flame {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: ame-flame 0.9s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ame-bob, .ame-flame { animation: none; }
+}
+
+/* Mobile: 16px inputs stop iOS Safari from zooming on focus */
+@media (max-width: 640px) {
+  input, textarea, select { font-size: 16px !important; }
+}
