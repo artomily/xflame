@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { connectFreighter } from "./stellar";
-import Ame from "./Ame";
 
 const FRIENDBOT = "https://friendbot.stellar.org";
 const HORIZON = "https://horizon-testnet.stellar.org";
@@ -87,72 +86,75 @@ export default function Faucet() {
   return (
     <div className="flex w-full max-w-md flex-col gap-4">
       {/* Heading */}
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-brand">Testnet Faucet</h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          Fund any Stellar testnet address with 10,000 XLM instantly
-        </p>
-      </div>
-
-      {/* Address row */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="faucet-address" className="text-xs font-medium uppercase tracking-wider text-ink-muted">
-          Stellar Address
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="faucet-address"
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            onBlur={handleAddressBlur}
-            placeholder="G…"
-            autoComplete="off"
-            spellCheck={false}
-            className="min-w-0 flex-1 rounded-lg border border-edge bg-surface px-3 py-2 font-mono text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 focus:ring-offset-canvas"
-          />
-          <button
-            type="button"
-            onClick={handleConnect}
-            className="shrink-0 rounded-lg border border-edge bg-surface px-3 py-2 text-sm text-ink transition-colors hover:bg-surface-mid focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-canvas focus-visible:outline-none"
-          >
-            Freighter
-          </button>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <img src="/ame.png" alt="Ame the blue flame" className="w-20" />
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Testnet faucet</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Fund any Stellar testnet address with 10,000 XLM instantly
+          </p>
         </div>
       </div>
 
-      {/* Balance card */}
-      {balance !== null && (
-        <div className="flex items-center justify-between rounded-lg border border-edge bg-surface px-4 py-3">
-          <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">Balance</span>
-          <span className="font-mono text-lg font-semibold text-ink tabular-nums">
-            {balance}{" "}
-            <span className="text-sm font-normal text-ink-muted">XLM</span>
-          </span>
+      {/* Address card */}
+      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="faucet-address" className="text-xs font-medium uppercase tracking-wider text-ink-muted">
+            Stellar address
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="faucet-address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              onBlur={handleAddressBlur}
+              placeholder="G…"
+              autoComplete="off"
+              spellCheck={false}
+              className="min-w-0 flex-1 rounded-lg border border-edge bg-canvas px-3 py-2.5 font-mono text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-brand"
+            />
+            <button
+              type="button"
+              onClick={handleConnect}
+              className="shrink-0 rounded-lg border border-edge bg-canvas px-3 py-2.5 text-sm text-ink transition-colors hover:bg-surface-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              Freighter
+            </button>
+          </div>
         </div>
-      )}
 
-      {/* Fund button */}
-      <button
-        type="button"
-        onClick={handleFund}
-        disabled={!isReady || status === "loading"}
-        className="flex items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {status === "loading" ? (
-          <>
-            <Ame size={20} mood="loading" title="" />
-            Funding…
-          </>
-        ) : (
-          "Fund with 10,000 XLM"
+        {balance !== null && (
+          <div className="flex items-center justify-between rounded-lg bg-surface-mid px-4 py-3">
+            <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">Balance</span>
+            <span className="font-mono text-lg font-semibold text-ink tabular-nums">
+              {balance}{" "}
+              <span className="text-sm font-normal text-ink-muted">XLM</span>
+            </span>
+          </div>
         )}
-      </button>
+
+        <button
+          type="button"
+          onClick={handleFund}
+          disabled={!isReady || status === "loading"}
+          className="flex items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {status === "loading" ? (
+            <>
+              <img src="/ame.png" alt="" className="ame-bob h-5 w-5 object-contain" />
+              Funding…
+            </>
+          ) : (
+            "Fund with 10,000 XLM"
+          )}
+        </button>
+      </div>
 
       {/* Success */}
       {status === "success" && (
-        <div className="flex items-center gap-3 rounded-lg border border-success/30 bg-success/10 px-4 py-3">
-          <Ame size={40} mood="happy" title="Ame is happy" className="shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3">
+          <img src="/dino.png" alt="" className="w-12 shrink-0 object-contain" />
           <div className="min-w-0">
             <p className="text-sm font-medium text-success">{message}</p>
             {txHash && (

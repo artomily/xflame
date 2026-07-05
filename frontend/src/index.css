@@ -1,39 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  /* Flame Protocol — light mode */
-  --color-brand:         oklch(0.52 0.25 32);
-  --color-brand-soft:    oklch(0.68 0.19 32);
-  --color-brand-fg:      oklch(0.98 0 0);
-  --color-canvas:        oklch(0.97 0.008 32);
+  /* Blue Flame — light mode */
+  --color-brand:         oklch(0.55 0.19 255);
+  --color-brand-soft:    oklch(0.72 0.13 250);
+  --color-brand-fg:      oklch(0.99 0 0);
+  --color-canvas:        oklch(0.975 0.01 240);
   --color-surface:       oklch(1 0 0);
-  --color-surface-mid:   oklch(0.94 0.01 32);
-  --color-ink:           oklch(0.18 0.02 32);
-  --color-ink-muted:     oklch(0.48 0.015 32);
-  --color-edge:          oklch(0.87 0.01 32);
+  --color-surface-mid:   oklch(0.945 0.015 240);
+  --color-ink:           oklch(0.24 0.035 255);
+  --color-ink-muted:     oklch(0.50 0.025 250);
+  --color-edge:          oklch(0.885 0.015 240);
   --color-success:       oklch(0.45 0.18 150);
   --color-danger:        oklch(0.55 0.22 25);
 }
 
-/* Ame the dino — mascot motion */
+/* Ame — mascot motion */
 @keyframes ame-bob {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6%); }
+  50%      { transform: translateY(-8%); }
 }
-@keyframes ame-flame {
-  0%, 100% { transform: scaleY(1); }
-  50%      { transform: scaleY(1.16); }
+@keyframes ame-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
 }
 .ame-bob {
-  animation: ame-bob 2.2s ease-in-out infinite;
+  animation: ame-bob 1.4s ease-in-out infinite;
 }
-.ame-flame {
-  transform-box: fill-box;
-  transform-origin: bottom center;
-  animation: ame-flame 0.9s ease-in-out infinite;
+.ame-float {
+  animation: ame-float 3.2s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ame-bob, .ame-flame { animation: none; }
+  .ame-bob, .ame-float { animation: none; }
 }
 
 /* Mobile: 16px inputs stop iOS Safari from zooming on focus */

@@ -1,14 +1,9 @@
-<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ame the xflame dino">
-  <path d="M20 18 L24 7 L30 17 Z" fill="#F06828"/>
-  <path d="M30 16 L35 5 L41 16 Z" fill="#F06828"/>
-  <path d="M41 17 L46 8 L50 19 Z" fill="#F06828"/>
-  <circle cx="32" cy="36" r="22" fill="#63BC8C"/>
-  <ellipse cx="32" cy="42" rx="12" ry="15" fill="#F5E6C8"/>
-  <circle cx="24" cy="32" r="6.5" fill="#FFFFFF"/>
-  <circle cx="40" cy="32" r="6.5" fill="#FFFFFF"/>
-  <circle cx="25.5" cy="33.5" r="3.2" fill="#2E2A24"/>
-  <circle cx="41.5" cy="33.5" r="3.2" fill="#2E2A24"/>
-  <circle cx="17" cy="40" r="3.2" fill="#EF9A8A" opacity="0.75"/>
-  <circle cx="47" cy="40" r="3.2" fill="#EF9A8A" opacity="0.75"/>
-  <path d="M28 41 Q32 46 36 41 Z" fill="#B5503F"/>
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ame the blue flame">
+  <path d="M32 3 C40 14 52 22 52 38 A20 21 0 0 1 12 38 C12 26 22 16 26 8 C27.5 12 30 14.5 32 15.5 C31 11 31 6 32 3 Z" fill="#3D8FE8"/>
+  <path d="M32 16 C37 23 44 28 44 39 A12 13 0 0 1 20 39 C20 31 27 24 29 19 C30 21.5 31.3 23 32.5 23.8 C32 21 31.5 18.5 32 16 Z" fill="#7CC0F5"/>
+  <circle cx="25.5" cy="38" r="4.4" fill="#123B6E"/>
+  <circle cx="38.5" cy="38" r="4.4" fill="#123B6E"/>
+  <circle cx="24.2" cy="36.6" r="1.5" fill="#FFFFFF"/>
+  <circle cx="37.2" cy="36.6" r="1.5" fill="#FFFFFF"/>
+  <path d="M28.5 45 Q32 48.5 35.5 45" fill="none" stroke="#123B6E" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

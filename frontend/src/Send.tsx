@@ -8,7 +8,6 @@ import {
 } from "@stellar/stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
 import { connectFreighter } from "./stellar";
-import Ame from "./Ame";
 
 const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
 
@@ -82,27 +81,33 @@ export default function Send() {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-4">
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-brand">Send XLM</h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          Transfer XLM to any Stellar address on testnet
-        </p>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <img src="/dino.png" alt="Ame's dino buddy" className="w-20" />
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Send XLM</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Transfer XLM to any Stellar address on testnet
+          </p>
+        </div>
       </div>
 
       {!wallet ? (
         <button
           type="button"
           onClick={handleConnect}
-          className="rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+          className="rounded-xl bg-brand py-3.5 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
         >
           Connect Freighter
         </button>
       ) : (
         <>
           {/* Connected wallet pill */}
-          <div className="flex items-center justify-between rounded-lg border border-edge bg-surface px-4 py-2">
-            <span className="font-mono text-xs text-ink-muted">
-              {wallet.slice(0, 8)}…{wallet.slice(-6)}
+          <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
+              <span className="font-mono text-xs text-ink-muted">
+                {wallet.slice(0, 6)}…{wallet.slice(-4)}
+              </span>
             </span>
             <button
               type="button"
@@ -113,7 +118,10 @@ export default function Send() {
             </button>
           </div>
 
-          <form onSubmit={handleSend} className="flex flex-col gap-3">
+          <form
+            onSubmit={handleSend}
+            className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4"
+          >
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="send-to"
@@ -132,7 +140,7 @@ export default function Send() {
                 required
                 minLength={56}
                 maxLength={56}
-                className="rounded-lg border border-edge bg-surface px-3 py-2 font-mono text-sm text-ink placeholder:text-ink-muted/40 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 focus:ring-offset-canvas"
+                className="rounded-lg border border-edge bg-canvas px-3 py-2.5 font-mono text-sm text-ink placeholder:text-ink-muted/40 focus:outline-none focus:ring-2 focus:ring-brand"
               />
             </div>
 
@@ -152,18 +160,18 @@ export default function Send() {
                 min="0.0000001"
                 step="any"
                 required
-                className="rounded-lg border border-edge bg-surface px-3 py-2 font-mono text-sm text-ink placeholder:text-ink-muted/40 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 focus:ring-offset-canvas"
+                className="rounded-lg border border-edge bg-canvas px-3 py-2.5 font-mono text-sm text-ink placeholder:text-ink-muted/40 focus:outline-none focus:ring-2 focus:ring-brand"
               />
             </div>
 
             <button
               type="submit"
               disabled={status === "loading"}
-              className="flex items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-40"
             >
               {status === "loading" ? (
                 <>
-                  <Ame size={20} mood="loading" title="" />
+                  <img src="/ame.png" alt="" className="ame-bob h-5 w-5 object-contain" />
                   Sending…
                 </>
               ) : (
@@ -175,8 +183,8 @@ export default function Send() {
       )}
 
       {status === "success" && (
-        <div className="flex items-center gap-3 rounded-lg border border-success/30 bg-success/10 px-4 py-3">
-          <Ame size={40} mood="happy" title="Ame is happy" className="shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3">
+          <img src="/dino.png" alt="" className="w-12 shrink-0 object-contain" />
           <div className="min-w-0">
             <p className="text-sm font-medium text-success">{message}</p>
             <a
