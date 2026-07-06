@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { connectFreighter, createSplitterClient, SPLITTER_ID } from "./stellar";
+import { useState, type FormEvent } from "react";
+import { connectFreighterSession, signInWithEmailDemo, createSplitterClient, SPLITTER_ID, type WalletSession } from "./stellar";
 import type { SplitRule } from "../bindings-splitter/index.ts";
 
 /* ---------- units + helpers ---------- */
@@ -66,7 +66,10 @@ function computeSplit(
 /* ---------- component ---------- */
 
 export default function Split() {
-  const [wallet, setWallet] = useState("");
+  const [session, setSession] = useState<WalletSession | null>(null);
+  const [email, setEmail] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
+  const [showFreighter, setShowFreighter] = useState(false);
   const [mode, setMode] = useState<Mode>("fixed");
   const [fixed, setFixed] = useState<FixedRow[]>([
     { pocket: "stability", pct: "50" },
@@ -95,8 +98,19 @@ export default function Split() {
   const fail = (e: unknown) =>
     setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Something went wrong" });
 
-  async function connect() {
-    try { setStatus(null); setWallet(await connectFreighter()); } catch (e) { fail(e); }
+  async function continueWithEmail(e: FormEvent) {
+    e.preventDefault();
+    setSigningIn(true); setStatus(null);
+    try {
+      setSession(await signInWithEmailDemo(email));
+    } catch (err) { fail(err); } finally { setSigningIn(false); }
+  }
+
+  async function connectFreighter() {
+    setSigningIn(true); setStatus(null);
+    try {
+      setSession(await connectFreighterSession());
+    } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
   function buildRule(): SplitRule {
@@ -120,32 +134,32 @@ export default function Split() {
   }
 
   async function saveRule() {
-    if (!wallet) return connect();
+    if (!session) return;
     setBusy("rule"); setStatus(null);
     try {
-      const tx = await createSplitterClient(wallet).set_rule({ user: wallet, rule: buildRule() });
+      const tx = await createSplitterClient(session).set_rule({ user: session.address, rule: buildRule() });
       await tx.signAndSend();
       setStatus({ kind: "ok", msg: "Split rule saved on-chain." });
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
-  async function loadPockets(addr = wallet) {
-    if (!addr) return;
+  async function loadPockets(addr = session?.address) {
+    if (!session || !addr) return;
     setBusy("load");
     try {
-      const tx = await createSplitterClient(addr).pockets({ user: addr });
+      const tx = await createSplitterClient(session).pockets({ user: addr });
       const map = tx.result as Map<string, bigint>;
       setPockets([...map.entries()].filter(([, v]) => v > 0n));
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
   async function deposit() {
-    if (!wallet) return connect();
+    if (!session) return;
     const amt = toStroops(amount);
     if (amt <= 0n) return;
     setBusy("deposit"); setStatus(null);
     try {
-      const tx = await createSplitterClient(wallet).deposit({ user: wallet, amount: amt });
+      const tx = await createSplitterClient(session).deposit({ user: session.address, amount: amt });
       await tx.signAndSend();
       setStatus({ kind: "ok", msg: `Deposited and split ${amount} XLM.` });
       setAmount("");
@@ -154,12 +168,12 @@ export default function Split() {
   }
 
   async function withdraw(pocket: string, xlm: string) {
-    if (!wallet) return connect();
+    if (!session) return;
     const amt = toStroops(xlm);
     if (amt <= 0n) return;
     setBusy("load"); setStatus(null);
     try {
-      const tx = await createSplitterClient(wallet).withdraw({ user: wallet, pocket, amount: amt });
+      const tx = await createSplitterClient(session).withdraw({ user: session.address, pocket, amount: amt });
       await tx.signAndSend();
       setStatus({ kind: "ok", msg: `Withdrew ${xlm} XLM from ${pocket}.` });
       await loadPockets();
@@ -189,29 +203,56 @@ export default function Split() {
         </div>
       )}
 
-      {/* Wallet row */}
-      <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
-        {wallet ? (
-          <>
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-              <span className="font-mono text-xs text-ink-muted">{wallet.slice(0, 6)}…{wallet.slice(-4)}</span>
+      {/* Sign in */}
+      {session ? (
+        <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
+            <span className="font-mono text-xs text-ink-muted">
+              {session.method === "email" ? email : `${session.address.slice(0, 6)}…${session.address.slice(-4)}`}
             </span>
-            <button type="button" onClick={() => { setWallet(""); setPockets([]); }}
-              className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
-              Disconnect
-            </button>
-          </>
-        ) : (
-          <>
-            <span className="text-xs text-ink-muted">Not connected</span>
-            <button type="button" onClick={connect}
-              className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-fg hover:opacity-90">
-              Connect Freighter
-            </button>
-          </>
-        )}
-      </div>
+          </span>
+          <button type="button" onClick={() => { setSession(null); setPockets([]); }}
+            className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
+            Sign out
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5 rounded-xl border border-edge bg-surface p-4">
+          {!showFreighter ? (
+            <>
+              <form onSubmit={continueWithEmail} className="flex gap-2">
+                <input type="email" required value={email} placeholder="you@email.com"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-brand" />
+                <button type="submit" disabled={signingIn}
+                  className="shrink-0 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-fg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+                  {signingIn ? "…" : "Continue"}
+                </button>
+              </form>
+              <p className="text-center text-[11px] text-ink-muted">
+                No seed phrase, no extension — just an email.{" "}
+                <button type="button" onClick={() => setShowFreighter(true)} className="underline underline-offset-2 hover:text-ink">
+                  Use Freighter instead
+                </button>
+              </p>
+            </>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-ink-muted">Connect an existing wallet</span>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={connectFreighter} disabled={signingIn}
+                  className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-fg hover:opacity-90 disabled:opacity-40">
+                  {signingIn ? "Connecting…" : "Connect Freighter"}
+                </button>
+                <button type="button" onClick={() => setShowFreighter(false)} className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
+                  Back to email
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Rule builder */}
       <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
@@ -282,7 +323,7 @@ export default function Split() {
           </>
         )}
 
-        <button type="button" onClick={saveRule} disabled={!ruleValid || !deployed || busy === "rule"}
+        <button type="button" onClick={saveRule} disabled={!ruleValid || !deployed || !session || busy === "rule"}
           className="rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           {busy === "rule" ? "Saving…" : "Save split rule"}
         </button>
@@ -324,7 +365,7 @@ export default function Split() {
           </div>
         )}
 
-        <button type="button" onClick={deposit} disabled={!amount || !deployed || busy === "deposit"}
+        <button type="button" onClick={deposit} disabled={!amount || !deployed || !session || busy === "deposit"}
           className="rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           {busy === "deposit" ? "Depositing…" : "Deposit & split"}
         </button>
@@ -334,7 +375,7 @@ export default function Split() {
       <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Your pockets</p>
-          <button type="button" onClick={() => loadPockets()} disabled={!wallet || !deployed || busy === "load"}
+          <button type="button" onClick={() => loadPockets()} disabled={!session || !deployed || busy === "load"}
             className="text-xs font-medium text-brand hover:underline disabled:text-ink-muted disabled:no-underline">
             {busy === "load" ? "Loading…" : "Refresh"}
           </button>

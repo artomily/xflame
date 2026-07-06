@@ -1,6 +1,18 @@
 import { isConnected, requestAccess, signTransaction as freighterSignTransaction } from "@stellar/freighter-api";
+import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { ClientOptions } from "@stellar/stellar-sdk/contract";
 import { Client as SplitterClient } from "../bindings-splitter/index.ts";
+
+const NETWORK_PASSPHRASE = import.meta.env.VITE_STELLAR_NETWORK_PASSPHRASE;
+const RPC_URL = import.meta.env.VITE_STELLAR_RPC_URL;
+const FRIENDBOT = "https://friendbot.stellar.org";
+
+export type WalletSession = {
+  address: string;
+  /** How the user got this session — only used for display copy. */
+  method: "freighter" | "email";
+  signTransaction: NonNullable<ClientOptions["signTransaction"]>;
+};
 
 export async function connectFreighter() {
   const check = await isConnected();
@@ -16,28 +28,58 @@ export async function connectFreighter() {
   return access.address;
 }
 
-/** Shared client options: network config + Freighter signer bound to one wallet. */
-function clientOptions(walletAddress: string, contractId: string): ClientOptions {
-  const networkPassphrase = import.meta.env.VITE_STELLAR_NETWORK_PASSPHRASE;
-  const rpcUrl = import.meta.env.VITE_STELLAR_RPC_URL;
-
+export async function connectFreighterSession(): Promise<WalletSession> {
+  const address = await connectFreighter();
   return {
-    contractId,
-    networkPassphrase,
-    rpcUrl,
-    publicKey: walletAddress,
-    signTransaction: async (xdr: string, opts?: Parameters<NonNullable<ClientOptions["signTransaction"]>>[1]) => {
+    address,
+    method: "freighter",
+    signTransaction: async (xdr, opts) => {
       const result = await freighterSignTransaction(xdr, {
-        networkPassphrase,
-        address: walletAddress,
+        networkPassphrase: NETWORK_PASSPHRASE,
+        address,
         ...opts,
       });
-
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
-
+      if (result.error) throw new Error(result.error.message);
       return result;
+    },
+  };
+}
+
+/**
+ * DEMO-ONLY email sign-in. Stands in for a production passkey-based smart
+ * wallet (no seed phrase, no browser extension) — see roadmap. A testnet
+ * keypair is generated locally per email and cached in localStorage so the
+ * "account" persists across visits.
+ *
+ * This is NOT a secure wallet: the secret key sits in plaintext in
+ * localStorage. Fine for a hackathon testnet demo where nothing of value is
+ * at stake; never do this for mainnet funds.
+ */
+export async function signInWithEmailDemo(email: string): Promise<WalletSession> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) throw new Error("Enter an email to continue");
+
+  const storageKey = `xflame-demo-key:${normalized}`;
+  let secret = localStorage.getItem(storageKey);
+  const isNew = !secret;
+  if (!secret) {
+    secret = Keypair.random().secret();
+    localStorage.setItem(storageKey, secret);
+  }
+
+  const keypair = Keypair.fromSecret(secret);
+  if (isNew) {
+    const res = await fetch(`${FRIENDBOT}?addr=${encodeURIComponent(keypair.publicKey())}`);
+    if (!res.ok) throw new Error("Couldn't fund the demo account — try again in a moment.");
+  }
+
+  return {
+    address: keypair.publicKey(),
+    method: "email",
+    signTransaction: async (xdr, opts) => {
+      const tx = TransactionBuilder.fromXDR(xdr, opts?.networkPassphrase ?? NETWORK_PASSPHRASE);
+      tx.sign(keypair);
+      return { signedTxXdr: tx.toXDR() };
     },
   };
 }
@@ -45,9 +87,15 @@ function clientOptions(walletAddress: string, contractId: string): ClientOptions
 /** Contract ID for the auto-split vault (Phase 1). Empty until the splitter is deployed. */
 export const SPLITTER_ID = import.meta.env.VITE_SPLITTER_CONTRACT_ID as string | undefined;
 
-export function createSplitterClient(walletAddress: string) {
+export function createSplitterClient(session: WalletSession) {
   if (!SPLITTER_ID) {
     throw new Error("Splitter not deployed yet — set VITE_SPLITTER_CONTRACT_ID in .env");
   }
-  return new SplitterClient(clientOptions(walletAddress, SPLITTER_ID));
+  return new SplitterClient({
+    contractId: SPLITTER_ID,
+    networkPassphrase: NETWORK_PASSPHRASE,
+    rpcUrl: RPC_URL,
+    publicKey: session.address,
+    signTransaction: session.signTransaction,
+  });
 }
