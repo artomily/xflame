@@ -3,9 +3,13 @@
 
   # xflame
 
+  [![CI](https://github.com/artomily/xflame/actions/workflows/ci.yml/badge.svg)](https://github.com/artomily/xflame/actions/workflows/ci.yml)
+
   **The moment stablecoin income lands, it's auto-split into a stability vault, a DCA basket, and spendable cash — instead of sitting idle even a minute.**
 
   Built on Stellar / Soroban. React + Tailwind frontend, fronted by *Ame* the blue flame.
+
+  **[Live demo →](https://frontend-ten-psi-12.vercel.app)**
 </div>
 
 ---
@@ -22,6 +26,17 @@ Millions of families in Indonesia and SEA receive remittances from relatives wor
 Near-zero Stellar fees make splitting on *every* deposit economical, and composing with audited Stellar infra (DeFindex, Soroswap) avoids bootstrapping DeFi trust from scratch.
 
 > **Status: Phase 1 MVP** — single-player split engine with Fixed + Goal rules and manual deposit. See the [roadmap](#roadmap).
+
+## Deployed on testnet
+
+| | |
+|---|---|
+| Splitter contract | [`CDN26FLI5JYVWKPB64E46WABV2W4BAPJW2JLDADNVAK6F7N5IZY7HVZI`](https://stellar.expert/explorer/testnet/contract/CDN26FLI5JYVWKPB64E46WABV2W4BAPJW2JLDADNVAK6F7N5IZY7HVZI) |
+| Deposit token (native XLM SAC) | [`CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC) |
+| `set_rule` tx (Fixed 50/30/20) | [`9bf2452c193591b36f0d1b5c0b379cd2353b6c1bd38c75519ec5a26e96c077df`](https://stellar.expert/explorer/testnet/tx/9bf2452c193591b36f0d1b5c0b379cd2353b6c1bd38c75519ec5a26e96c077df) |
+| `deposit` tx (100 XLM → split) | [`0df60589537d65ed69fa755508c99b8125af39c94c5e7196a998f37efb72a390`](https://stellar.expert/explorer/testnet/tx/0df60589537d65ed69fa755508c99b8125af39c94c5e7196a998f37efb72a390) |
+
+Verified on-chain: depositing 100 XLM against the Fixed 50/30/20 rule above produced pockets of exactly `stability: 500000000`, `dca: 300000000`, `cash: 200000000` stroops.
 
 ## Project structure
 
