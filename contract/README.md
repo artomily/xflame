@@ -1,22 +1,30 @@
-# Soroban Project
+# xflame — Soroban contracts
 
-## Project Structure
+Smart contracts for xflame. See the [root README](../README.md) for the product overview.
 
-This repository uses the recommended structure for a Soroban project:
+## Structure
 
 ```text
 .
 ├── contracts
-│   └── hello_world
-│       ├── src
-│       │   ├── lib.rs
-│       │   └── test.rs
-│       └── Cargo.toml
-├── Cargo.toml
+│   ├── splitter        # ⭐ Auto-split vault (Fixed + Goal split rules) — the product
+│   │   ├── src/lib.rs
+│   │   ├── src/test.rs
+│   │   └── Cargo.toml
+│   └── vault           # Generic single-token deposit/withdraw primitive
+├── Cargo.toml          # workspace
 └── README.md
 ```
 
-- New Soroban contracts can be put in `contracts`, each in their own directory. There is already a `hello_world` contract in there to get you started.
-- If you initialized this project with any other example contracts via `--with-example`, those contracts will be in the `contracts` directory as well.
-- Contracts should have their own `Cargo.toml` files that rely on the top-level `Cargo.toml` workspace for their dependencies.
-- Frontend libraries can be added to the top-level directory as well. If you initialized this project with a frontend template via `--frontend-template` you will have those files already included.
+## Common commands
+
+```bash
+cargo test                       # run all contract tests
+stellar contract build           # build all contracts to wasm
+
+# per-contract Makefile targets (build / test / deploy / fmt)
+make -C contracts/splitter test
+make -C contracts/splitter deploy STELLAR_ACCOUNT=deployer
+```
+
+Each contract has its own `Cargo.toml` and relies on the workspace `Cargo.toml` for shared dependencies. See the root README for full splitter deploy instructions (its constructor takes the deposit-token address).

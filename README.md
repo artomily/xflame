@@ -1,20 +1,44 @@
-# xflame
+<div align="center">
+  <img src="frontend/public/ame.png" alt="Ame, the xflame mascot" width="120" />
 
-Stellar DeFi toolkit — swap tokens, manage on-chain notes, and fund testnet accounts. Built on Soroban smart contracts with a React + Tailwind frontend.
+  # xflame
+
+  **The moment stablecoin income lands, it's auto-split into a stability vault, a DCA basket, and spendable cash — instead of sitting idle even a minute.**
+
+  Built on Stellar / Soroban. React + Tailwind frontend, fronted by *Ame* the blue flame.
+</div>
+
+---
+
+## The idea
+
+Millions of families in Indonesia and SEA receive remittances from relatives working abroad. When money lands, it either gets spent immediately or sits idle in an account earning nothing. Traditional auto-invest apps (Bibit, Acorns) are custodial and can't touch stablecoin income that never enters a bank.
+
+**xflame** is an auto-split vault. You define a rule once; every time funds arrive they're divided across named "pockets" automatically:
+
+- **Fixed split** — static percentages, e.g. 50% stability / 30% DCA / 20% cash.
+- **Goal-based split** — priority-ordered goals (dana darurat → DP motor → …); each deposit tops up goals in order until the target is met, and anything left over lands in a spendable overflow pocket.
+
+Near-zero Stellar fees make splitting on *every* deposit economical, and composing with audited Stellar infra (DeFindex, Soroswap) avoids bootstrapping DeFi trust from scratch.
+
+> **Status: Phase 1 MVP** — single-player split engine with Fixed + Goal rules and manual deposit. See the [roadmap](#roadmap).
 
 ## Project structure
 
 ```
 xflame/
-├── frontend/          # React + TypeScript + Vite + Tailwind v4
+├── frontend/                    # React + TypeScript + Vite + Tailwind v4
 │   ├── src/
-│   │   ├── App.tsx        # Main app — Notes and Faucet tabs
-│   │   ├── Faucet.tsx     # Testnet XLM faucet (Friendbot)
-│   │   └── stellar.ts     # Freighter wallet + contract client
-│   └── bindings/          # Auto-generated contract TypeScript client
-└── contract/          # Soroban smart contracts (Rust)
+│   │   ├── App.tsx              # Shell — Vault / Faucet / Send tabs
+│   │   ├── Split.tsx            # Auto-split vault: rule builder, deposit, pockets
+│   │   ├── Faucet.tsx           # Testnet XLM faucet (Friendbot)
+│   │   ├── Send.tsx             # Plain XLM transfer
+│   │   └── stellar.ts           # Freighter wallet + Soroban contract client
+│   └── bindings-splitter/       # Auto-generated splitter TypeScript client
+└── contract/                    # Soroban smart contracts (Rust)
     └── contracts/
-        └── hello-world/   # Notes contract (get, create, delete)
+        ├── splitter/            # ⭐ Auto-split vault (the product)
+        └── vault/               # Generic single-token vault primitive
 ```
 
 ## Prerequisites
@@ -25,122 +49,108 @@ xflame/
 - [Freighter wallet](https://www.freighter.app) browser extension (set to Testnet)
 
 ```bash
-# Add Rust wasm target
 rustup target add wasm32v1-none
-
-# Verify Stellar CLI
 stellar --version
 ```
 
-## Frontend
+## Run the frontend
 
 ```bash
 cd frontend
 npm install
-
-# Copy env and fill in your contract ID
-cp .env.example .env
-
-npm run dev       # http://localhost:5173
-npm run build
+cp .env.example .env      # fill in VITE_SPLITTER_CONTRACT_ID after deploying
+npm run dev               # http://localhost:5173
 ```
+
+Without a deployed contract the Vault runs in **preview mode**: you can design a split rule and see the live split preview, but on-chain actions (save rule / deposit / withdraw) are disabled until `VITE_SPLITTER_CONTRACT_ID` is set.
 
 ### Environment variables
 
 ```env
 VITE_STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 VITE_STELLAR_RPC_URL=https://soroban-testnet.stellar.org
-VITE_STELLAR_CONTRACT_ID=<your deployed contract ID>
+VITE_SPLITTER_CONTRACT_ID=      # deployed splitter contract ID
+VITE_XLM_TOKEN_ID=              # native XLM asset contract (deposit token)
 ```
 
-### Features
+## Features
 
-**Faucet tab** — Fund any Stellar testnet address with 10,000 XLM in one click. Paste an address or connect Freighter to auto-fill. No contract required — calls Friendbot directly.
+- **Vault** — the auto-split vault. Pick Fixed or Goal mode, build your rule, and watch a live preview of how any deposit divides across pockets. Deposit splits on-chain; withdraw per pocket; goal pockets show progress toward their target.
+- **Faucet** — fund any Stellar testnet address with 10,000 XLM in one click (calls Friendbot directly — no contract needed). Handy for funding a wallet before a demo.
+- **Send** — plain XLM transfer to any testnet address.
 
-**Notes tab** — Connect Freighter to read and write notes stored on-chain via the Soroban contract. Requires `VITE_STELLAR_CONTRACT_ID` to be set.
+## The splitter contract
 
-## Contract
+```rust
+// Bind the vault to the single stablecoin it accepts (constructor)
+__constructor(token: Address)
+
+// Configure how deposits are divided
+set_rule(user: Address, rule: SplitRule)
+
+// Deposit `amount` stroops and split across pockets per the rule
+deposit(user: Address, amount: i128)
+
+// Withdraw from a specific pocket
+withdraw(user: Address, pocket: Symbol, amount: i128)
+
+// Views
+pockets(user: Address) -> Map<Symbol, i128>
+pocket_balance(user: Address, pocket: Symbol) -> i128
+rule(user: Address) -> Option<SplitRule>
+
+pub enum SplitRule {
+    Fixed(Vec<Allocation>),          // bps must sum to 10_000
+    Goal(Vec<Goal>, Symbol),         // ordered goals + overflow pocket
+}
+```
+
+Balances are always preserved: the sum credited across pockets equals the deposit (the last Fixed pocket soaks any rounding remainder). For the MVP every pocket holds the same stablecoin — later phases route the stability pocket into a DeFindex vault and swap the DCA pocket via Soroswap behind the same surface.
 
 ```bash
 cd contract
-
-# Run tests
-cargo test
-
-# Build WASM
-stellar contract build
+cargo test               # 11 tests
+stellar contract build   # wasm → target/wasm32v1-none/release/splitter.wasm
 ```
 
 ### Deploy to testnet
 
-**1. Create and fund a deployer account**
-
 ```bash
+# 1. Create + fund a deployer
 stellar keys generate --global deployer --network testnet
 stellar keys fund deployer --network testnet
-```
 
-**2. Deploy**
+# 2. Deposit token = native XLM asset contract
+XLM=$(stellar contract id asset --asset native --network testnet)
 
-```bash
-# Via Makefile
-make deploy-testnet STELLAR_ACCOUNT=deployer
-
-# Or directly
+# 3. Deploy (constructor takes the token address)
 stellar contract deploy \
-  --network testnet \
-  --source deployer \
-  --wasm target/wasm32v1-none/release/notes.wasm
+  --network testnet --source deployer \
+  --wasm contract/target/wasm32v1-none/release/splitter.wasm \
+  -- --token "$XLM"
+
+# 4. Put the printed contract ID + $XLM into frontend/.env
+#    VITE_SPLITTER_CONTRACT_ID=C...
+#    VITE_XLM_TOKEN_ID=C...
 ```
 
-Copy the contract ID that's printed (starts with `C`).
-
-**3. Update frontend env**
+TypeScript bindings are already generated in `frontend/bindings-splitter/`. Regenerate them any time with:
 
 ```bash
-# frontend/.env
-VITE_STELLAR_CONTRACT_ID=<contract ID from step 2>
-```
-
-**4. Regenerate TypeScript bindings**
-
-```bash
-cd frontend
 stellar contract bindings typescript \
-  --network testnet \
-  --contract-id <contract ID> \
-  --output-dir bindings \
-  --overwrite
+  --wasm contract/target/wasm32v1-none/release/splitter.wasm \
+  --output-dir frontend/bindings-splitter --overwrite
 ```
 
-**5. Restart the dev server**
+## Roadmap
 
-```bash
-npm run dev
-```
+1. **Validate & MVP (single-player)** ← *you are here* — split engine (Fixed + Goal), manual deposit, DeFindex + Soroswap for one basket, PWA + Freighter.
+2. **Income-triggered automation** — split the moment funds land via streaming (StellarStream) and remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD); add reactive Smart split; native app.
+3. **Off-ramp / cash-out** — cash out to Rupiah / e-wallet.
+4. **Account safety** — guardian-based multi-sig recovery for non-crypto-native users.
+5. **Scale** — shared/group household vaults; expand to other SEA remittance corridors.
 
-## Contract interface
-
-```rust
-// Get all notes
-get_notes() -> Vec<Note>
-
-// Create a note — returns "ok"
-create_note(title: String, content: String) -> String
-
-// Delete a note by ID
-delete_note(id: u64)
-
-pub struct Note {
-    pub id:      u64,
-    pub title:   String,
-    pub content: String,
-}
-```
-
-Notes are stored in persistent ledger storage. IDs auto-increment.
-
-## Useful links
+## Links
 
 - [Soroban docs](https://developers.stellar.org/docs/build/smart-contracts/overview)
 - [Stellar testnet explorer](https://stellar.expert/explorer/testnet)

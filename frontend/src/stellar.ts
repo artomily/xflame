@@ -1,6 +1,6 @@
 import { isConnected, requestAccess, signTransaction as freighterSignTransaction } from "@stellar/freighter-api";
 import type { ClientOptions } from "@stellar/stellar-sdk/contract";
-import { Client } from "../bindings/index.ts";
+import { Client as SplitterClient } from "../bindings-splitter/index.ts";
 
 export async function connectFreighter() {
   const check = await isConnected();
@@ -16,12 +16,13 @@ export async function connectFreighter() {
   return access.address;
 }
 
-export function createContractClient(walletAddress: string) {
+/** Shared client options: network config + Freighter signer bound to one wallet. */
+function clientOptions(walletAddress: string, contractId: string): ClientOptions {
   const networkPassphrase = import.meta.env.VITE_STELLAR_NETWORK_PASSPHRASE;
   const rpcUrl = import.meta.env.VITE_STELLAR_RPC_URL;
 
-  return new Client({
-    contractId: import.meta.env.VITE_STELLAR_CONTRACT_ID,
+  return {
+    contractId,
     networkPassphrase,
     rpcUrl,
     publicKey: walletAddress,
@@ -38,5 +39,15 @@ export function createContractClient(walletAddress: string) {
 
       return result;
     },
-  });
+  };
+}
+
+/** Contract ID for the auto-split vault (Phase 1). Empty until the splitter is deployed. */
+export const SPLITTER_ID = import.meta.env.VITE_SPLITTER_CONTRACT_ID as string | undefined;
+
+export function createSplitterClient(walletAddress: string) {
+  if (!SPLITTER_ID) {
+    throw new Error("Splitter not deployed yet — set VITE_SPLITTER_CONTRACT_ID in .env");
+  }
+  return new SplitterClient(clientOptions(walletAddress, SPLITTER_ID));
 }
