@@ -184,10 +184,20 @@ export default function Split() {
     mode === "goal" ? goals.find((g) => symbolize(g.pocket) === p) : undefined;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4">
+    <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-5xl lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-6">
+      {!deployed && (
+        <div className="rounded-xl border border-brand-soft/40 bg-brand-soft/10 px-4 py-3 text-center text-xs text-ink-muted lg:col-span-2">
+          Preview mode — design your split now. Deploy the splitter and set{" "}
+          <code className="font-mono text-ink">VITE_SPLITTER_CONTRACT_ID</code> to go on-chain.
+        </div>
+      )}
+
+      {/* Left column: heading, sign-in, rule builder */}
+      <div className="flex flex-col gap-4 lg:col-start-1">
+
       {/* Heading */}
       <div className="flex flex-col items-center gap-2 text-center">
-        <img src="/dino.png" alt="Ame's dino" className="w-20" />
+        <img src="/dino.png" alt="Ame's dino" className="ame-float w-20" />
         <div>
           <h2 className="text-xl font-bold tracking-tight">Auto-split vault</h2>
           <p className="mt-1 text-sm text-ink-muted">
@@ -195,13 +205,6 @@ export default function Split() {
           </p>
         </div>
       </div>
-
-      {!deployed && (
-        <div className="rounded-xl border border-brand-soft/40 bg-brand-soft/10 px-4 py-3 text-center text-xs text-ink-muted">
-          Preview mode — design your split now. Deploy the splitter and set{" "}
-          <code className="font-mono text-ink">VITE_SPLITTER_CONTRACT_ID</code> to go on-chain.
-        </div>
-      )}
 
       {/* Sign in */}
       {session ? (
@@ -333,6 +336,10 @@ export default function Split() {
           </p>
         )}
       </div>
+      </div>
+
+      {/* Right column: deposit + live preview, pockets */}
+      <div className="flex flex-col gap-4 lg:col-start-2">
 
       {/* Deposit + live preview */}
       <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
@@ -388,9 +395,10 @@ export default function Split() {
           pockets.map(([p, v]) => <Pocket key={p} name={p} balance={v} goal={goalTargetOf(p)} onWithdraw={withdraw} />)
         )}
       </div>
+      </div>
 
       {status && (
-        <p className={`text-center text-sm ${status.kind === "ok" ? "text-success" : "text-danger"}`}>{status.msg}</p>
+        <p className={`text-center text-sm ${status.kind === "ok" ? "text-success" : "text-danger"} lg:col-span-2`}>{status.msg}</p>
       )}
     </div>
   );

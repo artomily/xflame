@@ -84,10 +84,12 @@ export default function Faucet() {
   const isReady = address.trim().length >= 56;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4">
+    <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-3xl lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+      <div className="flex flex-col gap-4 lg:col-start-1">
+
       {/* Heading */}
       <div className="flex flex-col items-center gap-2 text-center">
-        <img src="/ame.png" alt="Ame the blue flame" className="w-20" />
+        <img src="/ame.png" alt="Ame the blue flame" className="ame-float w-20" />
         <div>
           <h2 className="text-xl font-bold tracking-tight">Testnet faucet</h2>
           <p className="mt-1 text-sm text-ink-muted">
@@ -150,7 +152,9 @@ export default function Faucet() {
           )}
         </button>
       </div>
+      </div>
 
+      <div className="flex flex-col gap-4 lg:col-start-2">
       {/* Success */}
       {status === "success" && (
         <div className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3">
@@ -175,6 +179,7 @@ export default function Faucet() {
       {status === "error" && (
         <p className="text-center text-sm text-danger">{message}</p>
       )}
+      </div>
     </div>
   );
 }
