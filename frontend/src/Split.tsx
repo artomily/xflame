@@ -1,187 +1,15 @@
-import { useState, type FormEvent } from "react";
-import { connectFreighterSession, signInWithEmailDemo, createSplitterClient, SPLITTER_ID, type WalletSession } from "./stellar";
-import type { SplitRule } from "../bindings-splitter/index.ts";
+import { useState } from "react";
+import type { VaultState } from "./useVault";
+import { toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
 
-/* ---------- units + helpers ---------- */
-
-const STROOPS_PER_XLM = 10_000_000n;
-const toStroops = (xlm: string): bigint => {
-  const n = parseFloat(xlm);
-  if (!isFinite(n) || n <= 0) return 0n;
-  return BigInt(Math.round(n * 1e7));
-};
-const toXlm = (stroops: bigint): string => {
-  const whole = stroops / STROOPS_PER_XLM;
-  const frac = stroops % STROOPS_PER_XLM;
-  const f = frac.toString().padStart(7, "0").replace(/0+$/, "");
-  return f ? `${whole}.${f}` : whole.toString();
-};
-// Soroban Symbols allow [a-zA-Z0-9_], max 32 chars.
-const symbolize = (s: string) => s.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 32);
-
-type Mode = "fixed" | "goal";
-type FixedRow = { pocket: string; pct: string };
-type GoalRow = { pocket: string; target: string };
-
-/* ---------- local split preview (mirrors the contract) ---------- */
-
-function computeSplit(
-  mode: Mode,
-  fixed: FixedRow[],
-  goals: GoalRow[],
-  overflow: string,
-  amount: bigint,
-  current: Record<string, bigint>
-): Record<string, bigint> {
-  const out: Record<string, bigint> = {};
-  const add = (p: string, v: bigint) => { out[p] = (out[p] ?? 0n) + v; };
-
-  if (mode === "fixed") {
-    const rows = fixed.filter((r) => r.pocket && Number(r.pct) > 0);
-    let distributed = 0n;
-    rows.forEach((r, i) => {
-      const bps = BigInt(Math.round(Number(r.pct) * 100));
-      const part = i === rows.length - 1 ? amount - distributed : (amount * bps) / 10_000n;
-      add(symbolize(r.pocket), part);
-      distributed += part;
-    });
-  } else {
-    let remaining = amount;
-    for (const g of goals) {
-      if (remaining <= 0n) break;
-      const p = symbolize(g.pocket);
-      if (!p) continue;
-      const cur = current[p] ?? 0n;
-      const need = toStroops(g.target) - cur;
-      if (need <= 0n) continue;
-      const put = remaining < need ? remaining : need;
-      add(p, put);
-      remaining -= put;
-    }
-    if (remaining > 0n && overflow) add(symbolize(overflow), remaining);
-  }
-  return out;
-}
-
-/* ---------- component ---------- */
-
-export default function Split() {
-  const [session, setSession] = useState<WalletSession | null>(null);
-  const [email, setEmail] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
-  const [showFreighter, setShowFreighter] = useState(false);
-  const [mode, setMode] = useState<Mode>("fixed");
-  const [fixed, setFixed] = useState<FixedRow[]>([
-    { pocket: "stability", pct: "50" },
-    { pocket: "dca", pct: "30" },
-    { pocket: "cash", pct: "20" },
-  ]);
-  const [goals, setGoals] = useState<GoalRow[]>([
-    { pocket: "emergency", target: "100" },
-    { pocket: "motor", target: "300" },
-  ]);
-  const [overflow, setOverflow] = useState("cash");
-  const [amount, setAmount] = useState("");
-  const [pockets, setPockets] = useState<[string, bigint][]>([]);
-  const [busy, setBusy] = useState<"" | "rule" | "deposit" | "load">("");
-  const [status, setStatus] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
-
-  const deployed = Boolean(SPLITTER_ID);
-  const pctTotal = fixed.reduce((s, r) => s + (Number(r.pct) || 0), 0);
-  const fixedValid = mode === "fixed" ? Math.round(pctTotal) === 100 && fixed.every((r) => r.pocket) : true;
-  const goalValid = mode === "goal" ? goals.every((g) => g.pocket && Number(g.target) > 0) && Boolean(overflow) : true;
-  const ruleValid = mode === "fixed" ? fixedValid : goalValid;
-
-  const currentBalances: Record<string, bigint> = Object.fromEntries(pockets);
-  const preview = amount ? computeSplit(mode, fixed, goals, overflow, toStroops(amount), currentBalances) : {};
-
-  const fail = (e: unknown) =>
-    setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Something went wrong" });
-
-  async function continueWithEmail(e: FormEvent) {
-    e.preventDefault();
-    setSigningIn(true); setStatus(null);
-    try {
-      setSession(await signInWithEmailDemo(email));
-    } catch (err) { fail(err); } finally { setSigningIn(false); }
-  }
-
-  async function connectFreighter() {
-    setSigningIn(true); setStatus(null);
-    try {
-      setSession(await connectFreighterSession());
-    } catch (err) { fail(err); } finally { setSigningIn(false); }
-  }
-
-  function buildRule(): SplitRule {
-    if (mode === "fixed") {
-      return {
-        tag: "Fixed",
-        values: [
-          fixed
-            .filter((r) => r.pocket && Number(r.pct) > 0)
-            .map((r) => ({ pocket: symbolize(r.pocket), bps: Math.round(Number(r.pct) * 100) })),
-        ],
-      };
-    }
-    return {
-      tag: "Goal",
-      values: [
-        goals.filter((g) => g.pocket).map((g) => ({ pocket: symbolize(g.pocket), target: toStroops(g.target) })),
-        symbolize(overflow),
-      ],
-    };
-  }
-
-  async function saveRule() {
-    if (!session) return;
-    setBusy("rule"); setStatus(null);
-    try {
-      const tx = await createSplitterClient(session).set_rule({ user: session.address, rule: buildRule() });
-      await tx.signAndSend();
-      setStatus({ kind: "ok", msg: "Split rule saved on-chain." });
-    } catch (e) { fail(e); } finally { setBusy(""); }
-  }
-
-  async function loadPockets(addr = session?.address) {
-    if (!session || !addr) return;
-    setBusy("load");
-    try {
-      const tx = await createSplitterClient(session).pockets({ user: addr });
-      const map = tx.result as Map<string, bigint>;
-      setPockets([...map.entries()].filter(([, v]) => v > 0n));
-    } catch (e) { fail(e); } finally { setBusy(""); }
-  }
-
-  async function deposit() {
-    if (!session) return;
-    const amt = toStroops(amount);
-    if (amt <= 0n) return;
-    setBusy("deposit"); setStatus(null);
-    try {
-      const tx = await createSplitterClient(session).deposit({ user: session.address, amount: amt });
-      await tx.signAndSend();
-      setStatus({ kind: "ok", msg: `Deposited and split ${amount} XLM.` });
-      setAmount("");
-      await loadPockets();
-    } catch (e) { fail(e); } finally { setBusy(""); }
-  }
-
-  async function withdraw(pocket: string, xlm: string) {
-    if (!session) return;
-    const amt = toStroops(xlm);
-    if (amt <= 0n) return;
-    setBusy("load"); setStatus(null);
-    try {
-      const tx = await createSplitterClient(session).withdraw({ user: session.address, pocket, amount: amt });
-      await tx.signAndSend();
-      setStatus({ kind: "ok", msg: `Withdrew ${xlm} XLM from ${pocket}.` });
-      await loadPockets();
-    } catch (e) { fail(e); } finally { setBusy(""); }
-  }
-
-  const goalTargetOf = (p: string) =>
-    mode === "goal" ? goals.find((g) => symbolize(g.pocket) === p) : undefined;
+export default function Split({ vault }: { vault: VaultState }) {
+  const {
+    session, email, setEmail, signingIn, showFreighter, setShowFreighter,
+    mode, setMode, fixed, setFixed, goals, setGoals, overflow, setOverflow,
+    amount, setAmount, pockets, busy, status, deployed, pctTotal, ruleValid, preview,
+    sessionLabel, continueWithEmail, connectFreighter, signOut, saveRule, loadPockets,
+    deposit, withdraw, goalTargetOf,
+  } = vault;
 
   return (
     <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-5xl lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-6">
@@ -211,11 +39,9 @@ export default function Split() {
         <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
           <span className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-            <span className="font-mono text-xs text-ink-muted">
-              {session.method === "email" ? email : `${session.address.slice(0, 6)}…${session.address.slice(-4)}`}
-            </span>
+            <span className="font-mono text-xs text-ink-muted">{sessionLabel}</span>
           </span>
-          <button type="button" onClick={() => { setSession(null); setPockets([]); }}
+          <button type="button" onClick={signOut}
             className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
             Sign out
           </button>
@@ -258,7 +84,7 @@ export default function Split() {
       )}
 
       {/* Rule builder */}
-      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface p-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Split rule</p>
           <div className="flex rounded-lg border border-edge bg-canvas p-0.5 text-xs font-medium">
@@ -276,7 +102,7 @@ export default function Split() {
             {fixed.map((r, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input value={r.pocket} placeholder="pocket"
-                  onChange={(e) => setFixed(fixed.map((x, j) => j === i ? { ...x, pocket: symbolize(e.target.value) } : x))}
+                  onChange={(e) => setFixed(fixed.map((x, j) => j === i ? { ...x, pocket: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 32) } : x))}
                   className="min-w-0 flex-1 rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand" />
                 <div className="flex items-center gap-1">
                   <input value={r.pct} inputMode="decimal" placeholder="0"
@@ -304,7 +130,7 @@ export default function Split() {
               <div key={i} className="flex items-center gap-2">
                 <span className="w-5 text-center font-mono text-xs text-ink-muted">{i + 1}</span>
                 <input value={g.pocket} placeholder="goal name"
-                  onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, pocket: symbolize(e.target.value) } : x))}
+                  onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, pocket: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 32) } : x))}
                   className="min-w-0 flex-1 rounded-lg border border-edge bg-canvas px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand" />
                 <input value={g.target} inputMode="decimal" placeholder="target"
                   onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, target: e.target.value.replace(/[^0-9.]/g, "") } : x))}
@@ -319,7 +145,7 @@ export default function Split() {
               className="self-start text-xs font-medium text-brand hover:underline">+ Add goal</button>
             <div className="flex items-center gap-2 border-t border-edge pt-3">
               <span className="text-xs text-ink-muted">Overflow →</span>
-              <input value={overflow} onChange={(e) => setOverflow(symbolize(e.target.value))}
+              <input value={overflow} onChange={(e) => setOverflow(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 32))}
                 className="w-32 rounded-lg border border-edge bg-canvas px-3 py-1.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand" />
               <span className="text-xs text-ink-muted">once goals are met</span>
             </div>
@@ -342,7 +168,7 @@ export default function Split() {
       <div className="flex flex-col gap-4 lg:col-start-2">
 
       {/* Deposit + live preview */}
-      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface p-4">
         <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Deposit &amp; split</p>
         <div className="flex gap-2">
           <input value={amount} inputMode="decimal" placeholder="0.00"
@@ -379,7 +205,7 @@ export default function Split() {
       </div>
 
       {/* Pockets */}
-      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface p-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Your pockets</p>
           <button type="button" onClick={() => loadPockets()} disabled={!session || !deployed || busy === "load"}
