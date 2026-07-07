@@ -20,11 +20,21 @@
 
 ---
 
-## The idea
+## The problem
 
-Millions of families in Indonesia and SEA receive remittances from relatives working abroad. When money lands, it either gets spent immediately or sits idle in an account earning nothing. Traditional auto-invest apps (Bibit, Acorns) are custodial and can't touch stablecoin income that never enters a bank.
+Millions of families in Indonesia and SEA receive remittances from relatives working abroad. Getting paid in stablecoins instead of through a bank is already a huge upgrade — it lands in seconds and fees are near zero.
 
-**xflame** is an auto-split vault. You define a rule once; every time funds arrive they're divided across named "pockets" automatically:
+But that's where it stops. The moment the money arrives, it just **sits idle** in a wallet:
+
+- No savings discipline, no investing, no budget — just a balance that doesn't move.
+- Traditional auto-invest apps (Bibit, Acorns, …) are custodial and can't touch stablecoin income that never enters a bank.
+- Managing it manually (moving % to savings, % to DCA, % to spend) is tedious enough that most people just... don't.
+
+**The hard part was never receiving the money. It's what happens the second after it lands — and right now, nobody's managing that.**
+
+## The solution
+
+**xflame** is an auto-split vault. You define a split rule once; every time funds arrive they're divided across named "pockets" automatically, on-chain:
 
 - **Fixed split** — static percentages, e.g. 50% stability / 30% DCA / 20% cash.
 - **Goal-based split** — priority-ordered goals (dana darurat → DP motor → …); each deposit tops up goals in order until the target is met, and anything left over lands in a spendable overflow pocket.
@@ -32,6 +42,37 @@ Millions of families in Indonesia and SEA receive remittances from relatives wor
 Near-zero Stellar fees make splitting on *every* deposit economical, and composing with audited Stellar infra (DeFindex, Soroswap) avoids bootstrapping DeFi trust from scratch.
 
 > **Status: Phase 1 MVP** — single-player split engine with Fixed + Goal rules and manual deposit. See the [roadmap](#roadmap).
+
+### How it works
+
+```mermaid
+flowchart LR
+    A["💰 Stablecoin income\narrives in wallet"] --> B{Split rule}
+    B -->|Fixed 50%| C["🛡️ Stability pocket"]
+    B -->|Fixed 30%| D["📈 DCA pocket"]
+    B -->|Fixed 20%| E["💵 Cash pocket\n(spendable)"]
+
+    B -.Goal mode.-> F["🎯 Goal 1\n(priority)"]
+    F -->|target met| G["🎯 Goal 2\n(priority)"]
+    G -->|overflow| E
+```
+
+1. **Set a rule once** — Fixed percentages or priority-ordered Goals.
+2. **Income lands** — stablecoin arrives from family abroad, no bank or custodian in the middle.
+3. **It auto-splits** — every deposit divides across pockets on-chain, instantly.
+
+### Architecture
+
+```mermaid
+graph TD
+    U["User"] -->|"Email demo sign-in\nor Freighter wallet"| FE["Frontend\nReact + Vite + Tailwind"]
+    FE -->|Soroban RPC| RPC["Stellar Soroban RPC\n(testnet)"]
+    RPC --> SC["Splitter contract\n(Rust / Soroban)"]
+    SC --> P1[("Pocket: stability")]
+    SC --> P2[("Pocket: dca")]
+    SC --> P3[("Pocket: cash")]
+    FB["Friendbot faucet"] -.funds testnet wallet.-> U
+```
 
 ## Deployed on testnet
 
@@ -164,6 +205,25 @@ stellar contract bindings typescript \
 ```
 
 ## Roadmap
+
+```mermaid
+timeline
+    title xflame roadmap
+    Phase 1 · you are here : Split engine (Fixed + Goal)
+                            : Manual deposit
+                            : DeFindex + Soroswap for one basket
+                            : PWA + Freighter
+    Phase 2 : Income-triggered split (StellarStream)
+            : Remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD)
+            : Reactive Smart split
+            : Native app
+    Phase 3 : Off-ramp / cash-out to Rupiah
+            : Off-ramp / cash-out to e-wallet
+    Phase 4 : Guardian-based multi-sig recovery
+            : Built for non-crypto-native users
+    Phase 5 : Shared/group household vaults
+            : Expand to other SEA remittance corridors
+```
 
 1. **Validate & MVP (single-player)** ← *you are here* — split engine (Fixed + Goal), manual deposit, DeFindex + Soroswap for one basket, PWA + Freighter.
 2. **Income-triggered automation** — split the moment funds land via streaming (StellarStream) and remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD); add reactive Smart split; native app.
