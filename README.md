@@ -9,14 +9,13 @@
 
   Built on Stellar / Soroban. React + Tailwind frontend, fronted by *Ame* the blue flame.
 
-  **[Live demo →](https://frontend-ten-psi-12.vercel.app)**
+  **[Live demo →](https://xflame.vercel.app)**
 
-  <!-- Ganti VIDEO_ID (2 tempat) dengan ID video YouTube, mis. https://youtu.be/VIDEO_ID -->
-  <a href="https://youtu.be/VIDEO_ID">
-    <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" alt="Watch the xflame demo" width="640" />
+  <a href="https://youtu.be/kdpUCG3ZmGs">
+    <img src="https://img.youtube.com/vi/kdpUCG3ZmGs/maxresdefault.jpg" alt="Watch the xflame demo" width="640" />
   </a>
 
-  <sub>▶ Watch the 2-minute demo</sub>
+  <sub>▶ Watch the demo video</sub>
 </div>
 
 ---

@@ -1,6 +1,6 @@
 import { VaultIcon, FaucetIcon, SendIcon, AutoTriggerIcon, OffRampIcon, AccountSafetyIcon, ScaleIcon } from "./icons";
 
-const LIVE_DEMO = "https://frontend-ten-psi-12.vercel.app";
+const LIVE_DEMO = "https://youtu.be/kdpUCG3ZmGs";
 
 /* ---------- content ---------- */
 
