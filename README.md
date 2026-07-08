@@ -213,23 +213,19 @@ timeline
                             : Manual deposit
                             : DeFindex + Soroswap for one basket
                             : PWA + Freighter
-    Phase 2 : Income-triggered split (StellarStream)
-            : Remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD)
-            : Reactive Smart split
-            : Native app
-    Phase 3 : Off-ramp / cash-out to Rupiah
-            : Off-ramp / cash-out to e-wallet
-    Phase 4 : Guardian-based multi-sig recovery
-            : Built for non-crypto-native users
-    Phase 5 : Shared/group household vaults
-            : Expand to other SEA remittance corridors
+    Phase 2 · Automate and cash out : Income-triggered split (StellarStream)
+                                     : Remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD)
+                                     : AI-assisted Smart split agent
+                                     : Native app
+                                     : Off-ramp to Rupiah / e-wallet
+    Phase 3 · Trust and scale : Guardian-based multi-sig recovery
+                               : AI advisor agent for household vaults
+                               : Expand to other SEA remittance corridors
 ```
 
 1. **Validate & MVP (single-player)** ← *you are here* — split engine (Fixed + Goal), manual deposit, DeFindex + Soroswap for one basket, PWA + Freighter.
-2. **Income-triggered automation** — split the moment funds land via streaming (StellarStream) and remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD); add reactive Smart split; native app.
-3. **Off-ramp / cash-out** — cash out to Rupiah / e-wallet.
-4. **Account safety** — guardian-based multi-sig recovery for non-crypto-native users.
-5. **Scale** — shared/group household vaults; expand to other SEA remittance corridors.
+2. **Automate & cash out** — income-triggered split the moment funds land via streaming (StellarStream) and remittance rails (Velo Labs/Lightnet, MoneyGram MGUSD); an AI-assisted Smart split agent handles rebalance/timing; native app; off-ramp to Rupiah / e-wallet — closing the loop from income to spendable cash.
+3. **Trust & scale** — guardian-based multi-sig recovery for non-crypto-native users; an AI advisor agent for shared household vaults; expand to other SEA remittance corridors.
 
 ## Links
 
