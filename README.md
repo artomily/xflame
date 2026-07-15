@@ -9,7 +9,7 @@
 
   Built on Stellar / Soroban. React + Tailwind frontend, fronted by *Ame* the blue flame.
 
-  **[Live demo →](https://xflame.vercel.app)**
+  **[Live demo →](https://xflame.vercel.app)**  ·  **[Pitch deck →](xflame-pitch-deck.pptx)**
 
   <a href="https://youtu.be/kdpUCG3ZmGs">
     <img src="https://img.youtube.com/vi/kdpUCG3ZmGs/maxresdefault.jpg" alt="Watch the xflame demo" width="640" />
