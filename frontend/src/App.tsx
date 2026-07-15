@@ -15,7 +15,9 @@ import {
   OffRampIcon,
   AccountSafetyIcon,
   ScaleIcon,
+  FeedbackIcon,
 } from "./icons";
+import { FEEDBACK_FORM_URL } from "./config";
 
 export type Tab = "dashboard" | "vault" | "faucet" | "send";
 
@@ -73,8 +75,19 @@ export default function App() {
             ))}
           </nav>
 
-          <span className="rounded-full border border-edge bg-surface px-2.5 py-1 text-[11px] font-medium text-ink-muted sm:hidden">
-            Testnet
+          <span className="flex items-center gap-3 sm:hidden">
+            <a
+              href={FEEDBACK_FORM_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Send feedback"
+              className="text-ink-muted hover:text-ink"
+            >
+              <FeedbackIcon />
+            </a>
+            <span className="rounded-full border border-edge bg-surface px-2.5 py-1 text-[11px] font-medium text-ink-muted">
+              Testnet
+            </span>
           </span>
         </div>
       </header>
@@ -88,7 +101,16 @@ export default function App() {
       </div>
 
       {/* Footer (desktop) */}
-      <footer className="hidden pb-6 text-center text-xs text-ink-muted sm:block lg:hidden">
+      <footer className="hidden flex-col items-center gap-2 pb-6 text-center text-xs text-ink-muted sm:flex lg:hidden">
+        <a
+          href={FEEDBACK_FORM_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1.5 font-medium text-ink-muted hover:text-ink"
+        >
+          <FeedbackIcon />
+          Send feedback
+        </a>
         Runs on Stellar testnet · fueled by Ame
       </footer>
 

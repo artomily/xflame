@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import type { Tab } from "./App";
+import { FeedbackIcon } from "./icons";
+import { FEEDBACK_FORM_URL } from "./config";
 
 export default function Sidebar({
   tabs,
@@ -57,7 +59,16 @@ export default function Sidebar({
         ))}
       </div>
 
-      <div className="mt-auto flex flex-col gap-2 border-t border-edge px-6 py-4">
+      <div className="mt-auto flex flex-col gap-3 border-t border-edge px-6 py-4">
+        <a
+          href={FEEDBACK_FORM_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 text-sm font-medium text-ink-muted hover:text-ink"
+        >
+          <FeedbackIcon />
+          Send feedback
+        </a>
         <span className="self-start rounded-full border border-edge bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink-muted">
           Testnet
         </span>
