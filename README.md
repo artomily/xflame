@@ -85,6 +85,10 @@ graph TD
 
 Verified on-chain: depositing 100 XLM against the Fixed 50/30/20 rule above produced pockets of exactly `stability: 500000000`, `dca: 300000000`, `cash: 200000000` stroops.
 
+## User onboarding & feedback
+
+See [USER_FEEDBACK.md](USER_FEEDBACK.md) for the wallet-interaction log (10+ real users onboarded on testnet) and a summary of feedback collected via the in-app feedback form.
+
 ## Project structure
 
 ```
