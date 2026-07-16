@@ -29,6 +29,8 @@ export function useVault() {
   const [busy, setBusy] = useState<"" | "rule" | "deposit" | "load">("");
   const [status, setStatus] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [pocketFilter, setPocketFilter] = useState("");
+  const [ruleSaved, setRuleSaved] = useState(false);
+  const [hasDeposited, setHasDeposited] = useState(false);
 
   const deployed = Boolean(SPLITTER_ID);
   const pctTotal = fixed.reduce((s, r) => s + (Number(r.pct) || 0), 0);
@@ -68,24 +70,40 @@ export function useVault() {
   const fail = (e: unknown) =>
     setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Something went wrong" });
 
+  async function checkExistingRule(s: WalletSession) {
+    if (!deployed) return;
+    try {
+      const tx = await createSplitterClient(s).rule({ user: s.address });
+      setRuleSaved(tx.result !== null && tx.result !== undefined);
+    } catch {
+      setRuleSaved(false);
+    }
+  }
+
   async function continueWithEmail(e: FormEvent) {
     e.preventDefault();
     setSigningIn(true); setStatus(null);
     try {
-      setSession(await signInWithEmailDemo(email));
+      const s = await signInWithEmailDemo(email);
+      setSession(s);
+      await checkExistingRule(s);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
   async function connectFreighter() {
     setSigningIn(true); setStatus(null);
     try {
-      setSession(await connectFreighterSession());
+      const s = await connectFreighterSession();
+      setSession(s);
+      await checkExistingRule(s);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
   function signOut() {
     setSession(null);
     setPockets([]);
+    setRuleSaved(false);
+    setHasDeposited(false);
   }
 
   function buildRule(): SplitRule {
@@ -114,6 +132,7 @@ export function useVault() {
     try {
       const tx = await createSplitterClient(session).set_rule({ user: session.address, rule: buildRule() });
       await tx.signAndSend();
+      setRuleSaved(true);
       setStatus({ kind: "ok", msg: "Split rule saved on-chain." });
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
@@ -123,8 +142,10 @@ export function useVault() {
     setBusy("load");
     try {
       const tx = await createSplitterClient(session).pockets({ user: addr });
-      const map = tx.result as Map<string, bigint>;
-      setPockets([...map.entries()].filter(([, v]) => v > 0n));
+      // The SDK decodes a Soroban Map as an array of [key, value] tuples at
+      // runtime, not a native JS Map, despite the `Map<string, i128>` TS type.
+      const entries = tx.result as unknown as [string, bigint][];
+      setPockets(entries.filter(([, v]) => v > 0n));
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
@@ -136,6 +157,7 @@ export function useVault() {
     try {
       const tx = await createSplitterClient(session).deposit({ user: session.address, amount: amt });
       await tx.signAndSend();
+      setHasDeposited(true);
       setStatus({ kind: "ok", msg: `Deposited and split ${amount} XLM.` });
       setAmount("");
       await loadPockets();
@@ -162,7 +184,7 @@ export function useVault() {
     session, email, setEmail, signingIn, showFreighter, setShowFreighter,
     mode, setMode, fixed, setFixed, goals, setGoals, overflow, setOverflow,
     amount, setAmount, pockets, busy, status, pocketFilter, setPocketFilter,
-    deployed, pctTotal, ruleValid, preview,
+    deployed, pctTotal, ruleValid, preview, ruleSaved, hasDeposited,
     totalBalance, configuredCount, coveragePct, nestedItems, filteredPockets, sessionLabel,
     continueWithEmail, connectFreighter, signOut, saveRule, loadPockets, deposit, withdraw, goalTargetOf,
   };

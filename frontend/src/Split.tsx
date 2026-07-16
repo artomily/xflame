@@ -1,12 +1,14 @@
 import { useState } from "react";
 import type { VaultState } from "./useVault";
 import { toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
+import { FEEDBACK_FORM_URL } from "./config";
 
 export default function Split({ vault }: { vault: VaultState }) {
   const {
     session, email, setEmail, signingIn, showFreighter, setShowFreighter,
     mode, setMode, fixed, setFixed, goals, setGoals, overflow, setOverflow,
     amount, setAmount, pockets, busy, status, deployed, pctTotal, ruleValid, preview,
+    ruleSaved, hasDeposited,
     sessionLabel, continueWithEmail, connectFreighter, signOut, saveRule, loadPockets,
     deposit, withdraw, goalTargetOf,
   } = vault;
@@ -198,11 +200,24 @@ export default function Split({ vault }: { vault: VaultState }) {
           </div>
         )}
 
-        <button type="button" onClick={deposit} disabled={!amount || !deployed || !session || busy === "deposit"}
+        <button type="button" onClick={deposit} disabled={!amount || !deployed || !session || !ruleSaved || busy === "deposit"}
           className="rounded-lg bg-brand py-3 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           {busy === "deposit" ? "Depositing…" : "Deposit & split"}
         </button>
+        {session && !ruleSaved && (
+          <p className="text-center text-xs text-ink-muted">Save your split rule above first — deposits split against it on-chain.</p>
+        )}
       </div>
+
+      {hasDeposited && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-brand-soft/40 bg-brand-soft/10 px-4 py-3">
+          <p className="text-sm text-ink">🎉 First deposit done! Got 30 seconds to tell us how it went?</p>
+          <a href={FEEDBACK_FORM_URL} target="_blank" rel="noreferrer"
+            className="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-fg hover:opacity-90">
+            Give feedback
+          </a>
+        </div>
+      )}
 
       {/* Pockets */}
       <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface p-4">

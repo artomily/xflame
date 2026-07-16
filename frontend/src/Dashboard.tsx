@@ -78,6 +78,50 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 
 /* ---------- component ---------- */
 
+function OnboardingChecklist({ vault, onNavigate }: { vault: VaultState; onNavigate?: (t: Tab) => void }) {
+  const { session, ruleSaved, hasDeposited } = vault;
+  if (hasDeposited) return null;
+
+  const steps = [
+    { done: Boolean(session), label: "Sign in", hint: "Email or Freighter — no seed phrase needed" },
+    { done: ruleSaved, label: "Save a split rule", hint: "Fixed percentages or priority goals" },
+    { done: hasDeposited, label: "Make your first deposit", hint: "Watch it split into pockets on-chain" },
+  ];
+  const nextStep = steps.findIndex((s) => !s.done);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface px-6 py-5 lg:col-span-12">
+      <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Getting started</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+        {steps.map((s, i) => (
+          <div key={s.label} className="flex flex-1 items-start gap-2.5">
+            <span
+              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
+                s.done ? "bg-success text-brand-fg" : i === nextStep ? "bg-brand text-brand-fg" : "bg-surface-mid text-ink-muted"
+              }`}
+            >
+              {s.done ? "✓" : i + 1}
+            </span>
+            <div>
+              <p className={`text-sm font-medium ${s.done ? "text-ink-muted line-through" : "text-ink"}`}>{s.label}</p>
+              <p className="text-xs text-ink-muted">{s.hint}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {nextStep >= 0 && (
+        <button
+          type="button"
+          onClick={() => onNavigate?.("vault")}
+          className="self-start rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-brand-fg hover:opacity-90"
+        >
+          Continue in Vault →
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard({ vault, onNavigate }: { vault: VaultState; onNavigate?: (t: Tab) => void }) {
   const {
     session, sessionLabel, mode, coveragePct, totalBalance, pockets, configuredCount,
@@ -86,6 +130,8 @@ export default function Dashboard({ vault, onNavigate }: { vault: VaultState; on
 
   return (
     <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-6xl lg:grid lg:grid-cols-12 lg:items-start lg:gap-5">
+      <OnboardingChecklist vault={vault} onNavigate={onNavigate} />
+
       {/* Greeting bar */}
       <div className="flex flex-col gap-4 rounded-2xl border border-edge bg-surface px-6 py-5 lg:col-span-12 lg:flex-row lg:items-center">
         <div className="flex items-center gap-3">

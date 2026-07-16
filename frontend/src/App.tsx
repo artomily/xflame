@@ -5,6 +5,7 @@ import Split from "./Split";
 import Dashboard from "./Dashboard";
 import Sidebar from "./Sidebar";
 import Landing from "./Landing";
+import OnboardingModal from "./OnboardingModal";
 import { useVault } from "./useVault";
 import {
   DashboardIcon,
@@ -36,15 +37,31 @@ const ROADMAP: { label: string; icon: ReactNode }[] = [
   { label: "Scale", icon: <ScaleIcon /> },
 ];
 
+const ONBOARDING_SEEN_KEY = "xflame-onboarding-seen";
+
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const vault = useVault();
 
-  if (!entered) return <Landing onEnter={() => setEntered(true)} />;
+  function enter() {
+    setEntered(true);
+    if (!localStorage.getItem(ONBOARDING_SEEN_KEY)) {
+      setShowOnboarding(true);
+    }
+  }
+
+  function dismissOnboarding() {
+    localStorage.setItem(ONBOARDING_SEEN_KEY, "1");
+    setShowOnboarding(false);
+  }
+
+  if (!entered) return <Landing onEnter={enter} />;
 
   return (
     <main className="flex min-h-svh flex-col bg-canvas text-ink lg:flex-row">
+      {showOnboarding && <OnboardingModal onClose={dismissOnboarding} />}
       <Sidebar tabs={TABS} active={tab} onSelect={setTab} roadmap={ROADMAP} />
 
       {/* Top bar */}

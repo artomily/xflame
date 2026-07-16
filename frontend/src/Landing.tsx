@@ -1,6 +1,15 @@
 import { VaultIcon, FaucetIcon, SendIcon, AutoTriggerIcon, OffRampIcon, AccountSafetyIcon, ScaleIcon } from "./icons";
 
 const LIVE_DEMO = "https://youtu.be/kdpUCG3ZmGs";
+const GITHUB_REPO = "https://github.com/artomily/xflame";
+const CONTRACT_EXPLORER = "https://stellar.expert/explorer/testnet/contract/CDN26FLI5JYVWKPB64E46WABV2W4BAPJW2JLDADNVAK6F7N5IZY7HVZI";
+const VERIFIED_DEPOSIT_TX = "https://stellar.expert/explorer/testnet/tx/0df60589537d65ed69fa755508c99b8125af39c94c5e7196a998f37efb72a390";
+
+const TRUST_MARKS = [
+  { label: "Open source", href: GITHUB_REPO },
+  { label: "Contract verified on-chain", href: CONTRACT_EXPLORER },
+  { label: "Non-custodial — your keys sign every tx", href: undefined },
+];
 
 /* ---------- content ---------- */
 
@@ -49,6 +58,14 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="mb-8 text-center text-xs font-medium uppercase tracking-wider text-ink-muted">{children}</p>;
 }
 
+function CheckIcon({ className = "text-success" }: { className?: string }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 ${className}`} aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
 /* ---------- component ---------- */
 
 export default function Landing({ onEnter }: { onEnter: () => void }) {
@@ -80,7 +97,10 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
 
       {/* Hero */}
       <Band tone="canvas" className="flex flex-col items-center gap-6 pb-20 pt-16 text-center sm:pt-24">
-        <img src="/dino.png" alt="" className="ame-float h-28 w-28 object-contain sm:h-36 sm:w-36" />
+        <div className="relative flex items-center justify-center">
+          <div className="hero-glow absolute h-40 w-40 rounded-full sm:h-52 sm:w-52" aria-hidden="true" />
+          <img src="/dino.png" alt="" className="ame-float relative h-28 w-28 object-contain sm:h-36 sm:w-36" />
+        </div>
         <span className="rounded-full border border-edge bg-surface px-3 py-1 text-xs font-medium text-ink-muted">
           Phase 1 MVP · Stellar / Soroban testnet
         </span>
@@ -108,6 +128,28 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
             Watch demo
           </a>
         </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 pt-2">
+          {TRUST_MARKS.map((t) =>
+            t.href ? (
+              <a
+                key={t.label}
+                href={t.href}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs font-medium text-ink-muted underline-offset-2 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
+                <CheckIcon />
+                {t.label}
+              </a>
+            ) : (
+              <span key={t.label} className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                <CheckIcon />
+                {t.label}
+              </span>
+            )
+          )}
+        </div>
       </Band>
 
       {/* How it works — surface band, canvas cards */}
@@ -129,9 +171,17 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
       {/* Split illustration — canvas band, ink card */}
       <Band tone="canvas" className="py-16" delay={80}>
         <div className="mx-auto max-w-3xl rounded-2xl bg-ink p-6 text-brand-fg sm:p-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-bold uppercase tracking-wider">Fixed split · 50 / 30 / 20</span>
-            <span className="rounded-full bg-brand-fg/10 px-2.5 py-1 text-[11px] font-medium">Example</span>
+            <a
+              href={VERIFIED_DEPOSIT_TX}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-brand-fg/10 px-2.5 py-1 text-[11px] font-medium text-brand-fg/90 transition-colors hover:bg-brand-fg/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-fg"
+            >
+              <CheckIcon className="text-brand-fg" />
+              Real testnet tx — not a mockup ↗
+            </a>
           </div>
           <div className="mt-6 flex items-center gap-2 text-sm">
             <span className="font-mono font-semibold tabular-nums">100 XLM</span>

@@ -20,6 +20,8 @@ Proof of real users, wallet interactions, and feedback collected via the in-app
 
 ## Wallet interactions (proof of onboarding)
 
+Raw form responses (name, email, wallet, ratings, feedback): [xflame feedback — Google Sheet](https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/edit?usp=sharing)
+
 | # | Wallet address (truncated) | Action taken | Tx link |
 |---|---|---|---|
 | 1 | `GXXX...XXXX` | Set rule + deposit | [view on stellar.expert](https://stellar.expert/explorer/testnet) |
@@ -33,13 +35,13 @@ Proof of real users, wallet interactions, and feedback collected via the in-app
 | 9 | | | |
 | 10 | | | |
 
-**Total unique wallets onboarded:** `[N]` / 10 minimum
+**Total unique wallets onboarded:** `0` / 10 minimum — form is live but has 0 responses so far. Share the demo + form link with real users, then re-run this table from the sheet above.
 
 ---
 
 ## Feedback summary
 
-_Aggregate from `[N]` form responses collected between `[start date]` and `[end date]`._
+_Aggregate from `0` form responses collected so far — sheet linked above is live but empty. Fill this in once responses come in._
 
 | Metric | Result |
 |---|---|
@@ -68,9 +70,13 @@ _Aggregate from `[N]` form responses collected between `[start date]` and `[end 
 
 ## Screenshots
 
-- [ ] Product UI (desktop) — `[link/path to screenshot]`
-- [ ] Mobile responsive view — `[link/path to screenshot]`
-- [ ] Vercel Analytics / Speed Insights dashboard — `[link/path to screenshot]`
+- [x] Product UI (desktop) — [docs/screenshots/dashboard.png](docs/screenshots/dashboard.png)
+- [x] Mobile responsive view — [docs/screenshots/mobile.png](docs/screenshots/mobile.png)
+- [x] Vercel Analytics dashboard — [docs/screenshots/analytics-1.png](docs/screenshots/analytics-1.png)
+
+<img src="docs/screenshots/dashboard.png" width="600" alt="xflame dashboard" />
+<img src="docs/screenshots/mobile.png" width="220" alt="xflame mobile view" />
+<img src="docs/screenshots/analytics-1.png" width="600" alt="Vercel Analytics dashboard" />
 
 ---
 
