@@ -87,7 +87,52 @@ Verified on-chain: depositing 100 XLM against the Fixed 50/30/20 rule above prod
 
 ## User onboarding & feedback
 
-See [USER_FEEDBACK.md](USER_FEEDBACK.md) for the wallet-interaction log (10+ real users onboarded on testnet) and a summary of feedback collected via the in-app feedback form.
+**Status:** 1 real tester onboarded via the live feedback form so far — actively recruiting more toward the 10+ minimum. Full onboarding log and verification methodology: [USER_FEEDBACK.md](USER_FEEDBACK.md).
+
+- **Try it & give feedback:** [Google Form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform)
+- **Raw responses (live):** [Google Sheet](https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/edit?usp=sharing) (public, view-only)
+- **Exported snapshot (public, Excel):** [docs/feedback-responses.xlsx](docs/feedback-responses.xlsx) — re-export any time with:
+  ```bash
+  curl -L -o docs/feedback-responses.xlsx "https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/export?format=xlsx"
+  ```
+
+### Users Onboarded
+
+| User ID | Name | Email | Wallet Address | Feedback Summary |
+|---|---|---|---|---|
+| 01 | Ahmad Juan | _(not provided)_ | [`GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ`](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) | Signed in / funded testnet wallet only (no `set_rule` or `deposit` tx yet). Rated overall experience 4/5, first-split-rule clarity 5/5. Would "definitely" use it for family remittance income. No friction or feature request submitted. |
+| 02–10 | _pending — awaiting real testers_ | | | Share the [live demo](https://xflame.vercel.app) + [feedback form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform) to fill these in — see [USER_FEEDBACK.md](USER_FEEDBACK.md) for how each row is verified against stellar.expert. |
+
+### Feedback Implementation
+
+| User ID | Name | Email | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
+|---|---|---|---|---|---|---|
+| 01 | Ahmad Juan | _(not provided)_ | [`GDLY...NNQJ`](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) | Positive rating, no friction or feature request submitted | _None yet — nothing actionable reported_ | — |
+
+### Improvement Summary
+
+No shipped improvement is tied to a specific real-user response yet — the one response collected so far (#01) didn't flag a problem or request a feature. In the informal testing that led up to launching the form, we shipped changes aimed at exactly the kind of first-run confusion the form is designed to catch:
+
+- [`fa4394a`](https://github.com/artomily/xflame/commit/fa4394a) — wired up Vercel Analytics and the in-app feedback link, so real usage and friction could start being measured at all.
+- [`b1208ad`](https://github.com/artomily/xflame/commit/b1208ad) — fixed the feedback link, which had been pointing at a placeholder (`forms.gle/REPLACE_ME`) instead of the real form.
+- [`385804e`](https://github.com/artomily/xflame/commit/385804e) — added a first-run onboarding modal and an in-dashboard checklist (sign in → save a rule → deposit), targeting the most common early-user confusion: not knowing what to do first in a split-vault UI.
+
+This section will grow with real "reported issue → shipped fix → commit" rows as more of the 10+ testers come in.
+
+### Screenshots
+
+<img src="docs/screenshots/dashboard.png" width="600" alt="xflame dashboard" />
+<img src="docs/screenshots/mobile.png" width="220" alt="xflame mobile view" />
+
+### Analytics & monitoring
+
+[Vercel Analytics](https://vercel.com/docs/analytics) and [Speed Insights](https://vercel.com/docs/speed-insights) are wired into the frontend (`frontend/src/main.tsx`) and tracking the live deployment:
+
+<img src="docs/screenshots/analytics-1.png" width="600" alt="Vercel Analytics dashboard" />
+
+---
+
+Also see [BUSINESS.md](BUSINESS.md) for the monetization/business model behind xflame.
 
 ## Project structure
 

@@ -24,7 +24,7 @@ Raw form responses (name, email, wallet, ratings, feedback): [xflame feedback �
 
 | # | Wallet address (truncated) | Action taken | Tx link |
 |---|---|---|---|
-| 1 | `GXXX...XXXX` | Set rule + deposit | [view on stellar.expert](https://stellar.expert/explorer/testnet) |
+| 1 | `GDLY...NNQJ` | Signed in / funded testnet wallet only — no `set_rule` or `deposit` tx yet | [view on stellar.expert](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) |
 | 2 | | | |
 | 3 | | | |
 | 4 | | | |
@@ -35,36 +35,33 @@ Raw form responses (name, email, wallet, ratings, feedback): [xflame feedback �
 | 9 | | | |
 | 10 | | | |
 
-**Total unique wallets onboarded:** `0` / 10 minimum — form is live but has 0 responses so far. Share the demo + form link with real users, then re-run this table from the sheet above.
+**Total unique wallets onboarded:** `1` / 10 minimum — form is live with 1 real response (name: Ahmad Juan), but that wallet has only been funded and signed in, not yet exercised `set_rule`/`deposit` against the splitter contract. Share the demo + form link with real users, then re-run this table from the sheet above. See the [Users Onboarded / Feedback Implementation tables in README.md](README.md#user-onboarding--feedback) for the full per-user record.
 
 ---
 
 ## Feedback summary
 
-_Aggregate from `0` form responses collected so far — sheet linked above is live but empty. Fill this in once responses come in._
+_Aggregate from `1` form response collected so far (n=1 — directional only, not statistically meaningful; will be rewritten as a real aggregate once 10+ responses are in)._
 
 | Metric | Result |
 |---|---|
-| Avg. clarity of first split rule setup (1–5) | `[X.X]` |
-| % who said they'd actually use it for remittance income | `[XX]%` |
-| Most common friction point | `[e.g. "unclear what a pocket is"]` |
-| Most requested feature | `[e.g. "auto-split on arrival, not manual deposit"]` |
+| Avg. clarity of first split rule setup (1–5) | `5.0` (n=1) |
+| Avg. overall product rating (1–5) | `4.0` (n=1) |
+| % who said they'd actually use it for remittance income | `100%` (1/1) |
+| Most common friction point | _none reported yet_ |
+| Most requested feature | _none reported yet_ |
 
 ### What went well
-- `[quote or theme from responses]`
-- `[quote or theme from responses]`
+- First-run split-rule setup rated 5/5 for clarity by respondent #1.
+- Respondent #1 said they'd "definitely" use xflame if it were available for receiving remittance income from family/friends.
 
 ### What needs to improve
-- `[quote or theme from responses]`
-- `[quote or theme from responses]`
+- _Nothing specific reported yet — respondent #1 left the "most confusing part" and "feature request" questions blank._
+- Respondent #1 only signed in and funded a testnet wallet; didn't get as far as `set_rule`/`deposit`, so we don't yet have feedback on the actual split-vault flow from a real user.
 
 ### Representative quotes
 
-> "`[verbatim quote from a respondent]`"
-> — Respondent `#[N]`
-
-> "`[verbatim quote from a respondent]`"
-> — Respondent `#[N]`
+_None yet — respondent #1 didn't leave free-text answers. Will add real verbatim quotes here once more responses include them._
 
 ---
 

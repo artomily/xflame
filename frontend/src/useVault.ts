@@ -3,6 +3,9 @@ import { connectFreighterSession, signInWithEmailDemo, createSplitterClient, SPL
 import type { SplitRule } from "../bindings-splitter/index.ts";
 import { computeSplit, symbolize, toStroops, type Mode, type FixedRow, type GoalRow } from "./lib/splitMath";
 
+/** One confirmed on-chain movement, recorded so the dashboard can plot a week. */
+export type ActivityEntry = { ts: number; amount: bigint; kind: "deposit" | "withdraw" };
+
 /**
  * All vault state lives here, lifted above the Dashboard/Vault tabs so
  * signing in (or loading pockets) on one tab is still there when you
@@ -31,6 +34,8 @@ export function useVault() {
   const [pocketFilter, setPocketFilter] = useState("");
   const [ruleSaved, setRuleSaved] = useState(false);
   const [hasDeposited, setHasDeposited] = useState(false);
+  // Session-only — the contract keeps balances, not history.
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
 
   const deployed = Boolean(SPLITTER_ID);
   const pctTotal = fixed.reduce((s, r) => s + (Number(r.pct) || 0), 0);
@@ -104,6 +109,7 @@ export function useVault() {
     setPockets([]);
     setRuleSaved(false);
     setHasDeposited(false);
+    setActivity([]);
   }
 
   function buildRule(): SplitRule {
@@ -158,6 +164,7 @@ export function useVault() {
       const tx = await createSplitterClient(session).deposit({ user: session.address, amount: amt });
       await tx.signAndSend();
       setHasDeposited(true);
+      setActivity((a) => [...a, { ts: Date.now(), amount: amt, kind: "deposit" }]);
       setStatus({ kind: "ok", msg: `Deposited and split ${amount} XLM.` });
       setAmount("");
       await loadPockets();
@@ -172,6 +179,7 @@ export function useVault() {
     try {
       const tx = await createSplitterClient(session).withdraw({ user: session.address, pocket, amount: amt });
       await tx.signAndSend();
+      setActivity((a) => [...a, { ts: Date.now(), amount: amt, kind: "withdraw" }]);
       setStatus({ kind: "ok", msg: `Withdrew ${xlm} XLM from ${pocket}.` });
       await loadPockets();
     } catch (e) { fail(e); } finally { setBusy(""); }
@@ -185,7 +193,7 @@ export function useVault() {
     mode, setMode, fixed, setFixed, goals, setGoals, overflow, setOverflow,
     amount, setAmount, pockets, busy, status, pocketFilter, setPocketFilter,
     deployed, pctTotal, ruleValid, preview, ruleSaved, hasDeposited,
-    totalBalance, configuredCount, coveragePct, nestedItems, filteredPockets, sessionLabel,
+    totalBalance, configuredCount, coveragePct, nestedItems, filteredPockets, sessionLabel, activity,
     continueWithEmail, connectFreighter, signOut, saveRule, loadPockets, deposit, withdraw, goalTargetOf,
   };
 }

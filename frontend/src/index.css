@@ -6,6 +6,8 @@
   --color-brand-soft:    oklch(0.72 0.13 250);
   --color-brand-fg:      oklch(0.99 0 0);
   --color-canvas:        oklch(0.975 0.01 240);
+  /* Mat the app panel floats on — neutral, never a text background. */
+  --color-mat:           oklch(0.915 0.012 240);
   --color-surface:       oklch(1 0 0);
   --color-surface-mid:   oklch(0.945 0.015 240);
   --color-ink:           oklch(0.24 0.035 255);
