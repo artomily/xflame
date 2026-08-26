@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { connectFreighterSession, signInWithEmailDemo, createSplitterClient, SPLITTER_ID, type WalletSession } from "./stellar";
+import { connectFreighterSession, signInWithEmailDemo, createSplitterClient, fetchXlmBalance, SPLITTER_ID, type WalletSession } from "./stellar";
 import type { SplitRule } from "../bindings-splitter/index.ts";
-import { computeSplit, symbolize, toStroops, type Mode, type FixedRow, type GoalRow } from "./lib/splitMath";
+import { computeSplit, symbolize, toStroops, toXlm, type Mode, type FixedRow, type GoalRow } from "./lib/splitMath";
 
 /** One confirmed on-chain movement, recorded so the dashboard can plot a week. */
 export type ActivityEntry = { ts: number; amount: bigint; kind: "deposit" | "withdraw" };
@@ -36,6 +36,8 @@ export function useVault() {
   const [hasDeposited, setHasDeposited] = useState(false);
   // Session-only — the contract keeps balances, not history.
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  // Wallet's spendable XLM. null = not looked up yet.
+  const [walletBalance, setWalletBalance] = useState<bigint | null>(null);
 
   const deployed = Boolean(SPLITTER_ID);
   const pctTotal = fixed.reduce((s, r) => s + (Number(r.pct) || 0), 0);
@@ -75,6 +77,17 @@ export function useVault() {
   const fail = (e: unknown) =>
     setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Something went wrong" });
 
+  async function refreshBalance(addr?: string) {
+    const target = addr ?? session?.address;
+    if (!target) return;
+    try {
+      setWalletBalance(await fetchXlmBalance(target));
+    } catch {
+      // Balance is advisory only — never block the flow on it.
+      setWalletBalance(null);
+    }
+  }
+
   async function checkExistingRule(s: WalletSession) {
     if (!deployed) return;
     try {
@@ -91,7 +104,7 @@ export function useVault() {
     try {
       const s = await signInWithEmailDemo(email);
       setSession(s);
-      await checkExistingRule(s);
+      await Promise.all([checkExistingRule(s), refreshBalance(s.address)]);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
@@ -100,7 +113,7 @@ export function useVault() {
     try {
       const s = await connectFreighterSession();
       setSession(s);
-      await checkExistingRule(s);
+      await Promise.all([checkExistingRule(s), refreshBalance(s.address)]);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
@@ -110,6 +123,7 @@ export function useVault() {
     setRuleSaved(false);
     setHasDeposited(false);
     setActivity([]);
+    setWalletBalance(null);
   }
 
   function buildRule(): SplitRule {
@@ -161,13 +175,25 @@ export function useVault() {
     if (amt <= 0n) return;
     setBusy("deposit"); setStatus(null);
     try {
+      // Check funds first — otherwise an unfunded wallet (common with
+      // Freighter, which we never auto-fund) fails deep in the RPC with a
+      // message no tester can act on.
+      const bal = await fetchXlmBalance(session.address);
+      setWalletBalance(bal);
+      if (bal === 0n) {
+        throw new Error("This wallet has no testnet XLM yet — open the Faucet tab to fund it, then come back.");
+      }
+      if (bal < amt) {
+        throw new Error(`You only have ${toXlm(bal)} XLM. Deposit that or less, or top up in the Faucet tab.`);
+      }
+
       const tx = await createSplitterClient(session).deposit({ user: session.address, amount: amt });
       await tx.signAndSend();
       setHasDeposited(true);
       setActivity((a) => [...a, { ts: Date.now(), amount: amt, kind: "deposit" }]);
       setStatus({ kind: "ok", msg: `Deposited and split ${amount} XLM.` });
       setAmount("");
-      await loadPockets();
+      await Promise.all([loadPockets(), refreshBalance()]);
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
@@ -181,7 +207,7 @@ export function useVault() {
       await tx.signAndSend();
       setActivity((a) => [...a, { ts: Date.now(), amount: amt, kind: "withdraw" }]);
       setStatus({ kind: "ok", msg: `Withdrew ${xlm} XLM from ${pocket}.` });
-      await loadPockets();
+      await Promise.all([loadPockets(), refreshBalance()]);
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
@@ -194,6 +220,7 @@ export function useVault() {
     amount, setAmount, pockets, busy, status, pocketFilter, setPocketFilter,
     deployed, pctTotal, ruleValid, preview, ruleSaved, hasDeposited,
     totalBalance, configuredCount, coveragePct, nestedItems, filteredPockets, sessionLabel, activity,
+    walletBalance, refreshBalance,
     continueWithEmail, connectFreighter, signOut, saveRule, loadPockets, deposit, withdraw, goalTargetOf,
   };
 }

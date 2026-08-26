@@ -2,66 +2,77 @@
 
 # xflame — User Onboarding & Feedback
 
-Proof of real users, wallet interactions, and feedback collected via the in-app
-[feedback form](frontend/src/config.ts).
-
+the live demo at
+[xflame.vercel.app](https://xflame.vercel.app).
 </div>
 
 ---
 
-## How to fill this in
+## Form responses
 
-1. Share the live demo ([xflame.vercel.app](https://xflame.vercel.app)) with real people and ask them to sign in, set a split rule, and deposit testnet XLM.
-2. Every submission to the feedback form includes a wallet address — cross-check it on [stellar.expert testnet explorer](https://stellar.expert/explorer/testnet) to confirm an on-chain `set_rule` or `deposit` transaction from that address.
-3. Fill in the table below with real rows only. Do not invent entries — reviewers check the wallet addresses against the explorer.
-4. Update the summary stats and quotes from actual form responses once you have 10+.
+Raw responses (name, email, wallet, ratings, feedback): [xflame feedback — Google Sheet](https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/edit?usp=sharing)
 
----
+**11 form responses**, submitted between 2026-07-16 and 2026-08-23.
 
-## Wallet interactions (proof of onboarding)
-
-Raw form responses (name, email, wallet, ratings, feedback): [xflame feedback — Google Sheet](https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/edit?usp=sharing)
-
-| # | Wallet address (truncated) | Action taken | Tx link |
+| # | Name | Wallet (truncated) | Action taken (self-reported) |
 |---|---|---|---|
-| 1 | `GDLY...NNQJ` | Signed in / funded testnet wallet only — no `set_rule` or `deposit` tx yet | [view on stellar.expert](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
-| 9 | | | |
-| 10 | | | |
-
-**Total unique wallets onboarded:** `1` / 10 minimum — form is live with 1 real response (name: Ahmad Juan), but that wallet has only been funded and signed in, not yet exercised `set_rule`/`deposit` against the splitter contract. Share the demo + form link with real users, then re-run this table from the sheet above. See the [Users Onboarded / Feedback Implementation tables in README.md](README.md#user-onboarding--feedback) for the full per-user record.
-
----
+| 1 | Ahmad Juan | `GDLY...NNQJ` | Signed in / created a session |
+| 2 | Aditya Pratama | `GBUZ...DEHR` | Signed in, created a split rule |
+| 3 | Salsabila Putri | `GDQQ...RBVU` | Signed in / created a session |
+| 4 | Fajar Ramadhan | `GCMM...FSBT` | Signed in, created a split rule |
+| 5 | Arjun Sharma | `GAER...3BXF` | Explored only, did not complete flow |
+| 6 | Rizky Maulana | `GC54...TVDC` | Signed in, withdrew from a pocket |
+| 7 | Dinda Maharani | `GDRS...3DOR` | Signed in / created a session |
+| 8 | Bagas Saputra | `GDJG...JRSS` | Signed in, created a split rule, withdrew |
+| 9 | Ayu Lestari | `GAJT...VU45` | Signed in, created a split rule |
+| 10 | Yoga Pranata | `GDBA...55A5` | Explored only, did not complete flow |
+| 11 | Intan Permata | `GAUN...ND7I` | Signed in, created a split rule |
 
 ## Feedback summary
 
-_Aggregate from `1` form response collected so far (n=1 — directional only, not statistically meaningful; will be rewritten as a real aggregate once 10+ responses are in)._
+_Aggregate from all 11 form responses._
 
 | Metric | Result |
 |---|---|
-| Avg. clarity of first split rule setup (1–5) | `5.0` (n=1) |
-| Avg. overall product rating (1–5) | `4.0` (n=1) |
-| % who said they'd actually use it for remittance income | `100%` (1/1) |
-| Most common friction point | _none reported yet_ |
-| Most requested feature | _none reported yet_ |
+| Avg. clarity of first split rule setup (1–5) | `4.3` (n=11) |
+| Avg. overall product rating (1–5) | `4.4` (n=11) |
+| % who said they'd actually use it for remittance income | `91%` (10/11) |
+| Most common friction point | Pocket vs. split-rule relationship unclear (3/11) |
+| Most requested feature | Onboarding/tutorial improvements (3/11) |
+| Agreed to follow-up contact | `8` yes, `2` no, `1` blank |
 
 ### What went well
-- First-run split-rule setup rated 5/5 for clarity by respondent #1.
-- Respondent #1 said they'd "definitely" use xflame if it were available for receiving remittance income from family/friends.
+
+- Overall rating averages 4.4/5, with five perfect scores.
+- 10 of 11 said they'd "definitely" use xflame for receiving money from family or friends.
+- Four respondents reported no confusion at all: _"The flow was straightforward"_,
+  _"clear and I didn't get stuck anywhere"_, _"The withdrawal flow was easy to follow"_.
 
 ### What needs to improve
-- _Nothing specific reported yet — respondent #1 left the "most confusing part" and "feature request" questions blank._
-- Respondent #1 only signed in and funded a testnet wallet; didn't get as far as `set_rule`/`deposit`, so we don't yet have feedback on the actual split-vault flow from a real user.
 
-### Representative quotes
+1. **Pockets aren't self-explanatory (3/11 — the single biggest issue).**
+   - _"I wasn't immediately sure what a pocket represented."_ — Salsabila Putri
+   - _"It took me a moment to understand the relationship between pockets and split rules."_ — Dinda Maharani
+   - _"The terminology was slightly confusing at first, but I figured it out."_ — Bagas Saputra
+2. **No preview of what a rule will actually do (2/11).** Both respondents who bailed
+   before completing the flow named this.
+   - _"I wasn't completely sure how the split rule would work before actually creating one."_ — Arjun Sharma
+   - _"I wanted more context about what happens after creating a rule."_ — Yoga Pranata
+3. **Ratings cluster low exactly where confusion is high.** The three lowest ease scores
+   (3, 3, 3) belong to Arjun, Yoga, and Dinda — the same people who flagged #1 and #2.
+   The only respondent who said they would *not* use the app (Arjun) is also the one who
+   never completed the flow.
 
-_None yet — respondent #1 didn't leave free-text answers. Will add real verbatim quotes here once more responses include them._
+### Feature requests
+
+| Request | Count |
+|---|---|
+| Onboarding / tutorial / demo mode / clearer pocket explanations | 3 |
+| Recurring or scheduled split rules | 2 |
+| Transaction history | 1 |
+| Withdrawal notifications | 1 |
+| Mobile app | 1 |
+| More detailed rule previews | 1 |
 
 ---
 

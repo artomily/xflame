@@ -125,7 +125,7 @@ function AppShell() {
         {/* Page content — bottom padding clears the mobile nav */}
         <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center gap-6 px-4 pb-28 pt-8 sm:px-6 sm:pb-12 sm:pt-10 lg:max-w-none lg:items-stretch lg:px-0 lg:pb-0 lg:pt-6">
           {tab === "dashboard" && <Dashboard vault={vault} onNavigate={goTo} />}
-          {tab === "vault" && <Split vault={vault} />}
+          {tab === "vault" && <Split vault={vault} onNavigate={goTo} />}
           {tab === "faucet" && <Faucet />}
           {tab === "send" && <Send />}
         </div>

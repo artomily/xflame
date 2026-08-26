@@ -1,17 +1,20 @@
 import { useState } from "react";
+import type { Tab } from "./App";
 import type { VaultState } from "./useVault";
 import { toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
 import { FEEDBACK_FORM_URL } from "./config";
 
-export default function Split({ vault }: { vault: VaultState }) {
+export default function Split({ vault, onNavigate }: { vault: VaultState; onNavigate?: (t: Tab) => void }) {
   const {
     session, email, setEmail, signingIn, showFreighter, setShowFreighter,
     mode, setMode, fixed, setFixed, goals, setGoals, overflow, setOverflow,
     amount, setAmount, pockets, busy, status, deployed, pctTotal, ruleValid, preview,
-    ruleSaved, hasDeposited,
+    ruleSaved, hasDeposited, walletBalance,
     sessionLabel, continueWithEmail, connectFreighter, signOut, saveRule, loadPockets,
     deposit, withdraw, goalTargetOf,
   } = vault;
+
+  const unfunded = session !== null && walletBalance === 0n;
 
   return (
     <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-5xl lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-6">
@@ -171,7 +174,32 @@ export default function Split({ vault }: { vault: VaultState }) {
 
       {/* Deposit + live preview */}
       <div className="flex flex-col gap-3 rounded-2xl border border-edge bg-surface p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Deposit &amp; split</p>
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">Deposit &amp; split</p>
+          {session && walletBalance !== null && (
+            <p className="font-mono text-xs text-ink-muted">
+              Balance <span className="text-ink">{toXlm(walletBalance)}</span> XLM
+            </p>
+          )}
+        </div>
+
+        {/* Freighter wallets are never auto-funded — send them to the faucet
+            before they hit a failing deposit. */}
+        {unfunded && (
+          <div className="flex flex-col gap-2 rounded-lg border border-brand-soft/40 bg-brand-soft/10 p-3">
+            <p className="text-xs text-ink">
+              This wallet has no testnet XLM yet, so a deposit would fail. Fund it first — it's free and instant.
+            </p>
+            <button
+              type="button"
+              onClick={() => onNavigate?.("faucet")}
+              className="self-start rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              Get testnet XLM →
+            </button>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <input value={amount} inputMode="decimal" placeholder="0.00"
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}

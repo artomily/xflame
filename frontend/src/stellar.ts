@@ -6,6 +6,27 @@ import { Client as SplitterClient } from "../bindings-splitter/index.ts";
 const NETWORK_PASSPHRASE = import.meta.env.VITE_STELLAR_NETWORK_PASSPHRASE;
 const RPC_URL = import.meta.env.VITE_STELLAR_RPC_URL;
 const FRIENDBOT = "https://friendbot.stellar.org";
+const HORIZON = "https://horizon-testnet.stellar.org";
+
+/**
+ * Native XLM balance in stroops, or 0n for an account Horizon has never seen
+ * (a Freighter wallet that was created but never funded). Used to warn before
+ * a deposit rather than letting it fail with a raw RPC error.
+ */
+export async function fetchXlmBalance(address: string): Promise<bigint> {
+  const res = await fetch(`${HORIZON}/accounts/${encodeURIComponent(address)}`);
+  if (res.status === 404) return 0n;
+  if (!res.ok) throw new Error("Couldn't read your balance from Horizon.");
+
+  const json = (await res.json()) as { balances?: { asset_type: string; balance: string }[] };
+  const native = json.balances?.find((b) => b.asset_type === "native");
+  if (!native) return 0n;
+
+  // Parse the decimal string exactly — Horizon always returns 7 dp, and going
+  // via Number would lose precision on large testnet balances.
+  const [whole, frac = ""] = native.balance.split(".");
+  return BigInt(whole) * 10_000_000n + BigInt(frac.padEnd(7, "0").slice(0, 7));
+}
 
 export type WalletSession = {
   address: string;
