@@ -63,6 +63,16 @@ _Aggregate from all 11 form responses._
    The only respondent who said they would *not* use the app (Arjun) is also the one who
    never completed the flow.
 
+### Shipped in response
+
+| Issue reported | Fix | Commit |
+|---|---|---|
+| "Pocket" never defined (3 responses) | Defined in the onboarding modal and at the top of the rule builder, worded per mode | [`8210381`](https://github.com/artomily/xflame/commit/8210381) |
+| No preview of a rule's effect before saving (2 responses) | 100 XLM sample breakdown rendered in the rule builder as soon as the rule is valid | [`8a071a3`](https://github.com/artomily/xflame/commit/8a071a3) |
+
+See the [Feedback Implementation table in README.md](README.md#feedback-implementation)
+for the per-user mapping.
+
 ### Feature requests
 
 | Request | Count |
