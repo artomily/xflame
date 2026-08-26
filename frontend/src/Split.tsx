@@ -102,6 +102,12 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
           </div>
         </div>
 
+        <p className="text-xs text-ink-muted">
+          {mode === "fixed"
+            ? "Each pocket is a named bucket in your vault. Every deposit is divided between them by these percentages."
+            : "Each goal is a pocket with a target. Deposits fill them top to bottom; once all targets are met, the rest lands in your overflow pocket."}
+        </p>
+
         {mode === "fixed" ? (
           <>
             {fixed.map((r, i) => (
