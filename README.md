@@ -100,24 +100,61 @@ Verified on-chain: depositing 100 XLM against the Fixed 50/30/20 rule above prod
 
 | User ID | Name | Email | Wallet Address | Feedback Summary |
 |---|---|---|---|---|
-| 01 | Ahmad Juan | _(not provided)_ | [`GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ`](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) | Signed in / funded testnet wallet only (no `set_rule` or `deposit` tx yet). Rated overall experience 4/5, first-split-rule clarity 5/5. Would "definitely" use it for family remittance income. No friction or feature request submitted. |
-| 02–10 | _pending — awaiting real testers_ | | | Share the [live demo](https://xflame.vercel.app) + [feedback form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform) to fill these in — see [USER_FEEDBACK.md](USER_FEEDBACK.md) for how each row is verified against stellar.expert. |
+| 01 | Ahmad Juan | _(not provided)_ | `GDLY...NNQJ` | Signed in / created a session. Rated overall 4/5, first-rule clarity 5/5. Would "definitely" use it for family remittance income. No friction or feature request submitted. |
+| 02 | Aditya Pratama | _(not provided)_ | `GBUZ...DEHR` | Signed in, created a split rule. Rated 5/5 and 5/5. "Nothing was particularly confusing. The flow was straightforward." Requested recurring split rules. |
+| 03 | Salsabila Putri | salsabila01@gmail.com | `GDQQ...RBVU` | Signed in / created a session. Rated 4/5 and 4/5. **"I wasn't immediately sure what a pocket represented."** Requested better first-time onboarding. |
+| 04 | Fajar Ramadhan | fajarrre@gmail.com | `GCMM...FSBT` | Signed in, created a split rule. Rated 5/5 and 5/5. "The process was clear and I didn't get stuck anywhere." Requested transaction history. |
+| 05 | Arjun Sharma | shararjun11@gmail.com | `GAER...3BXF` | Explored without completing the flow. Rated 4/5, clarity 3/5. **"I wasn't completely sure how the split rule would work before actually creating one."** Requested a tutorial or demo mode. Only respondent who would not use the app. |
+| 06 | Rizky Maulana | _(not provided)_ | `GC54...TVDC` | Signed in, withdrew from a pocket. Rated 5/5 and 5/5. "The withdrawal flow was easy to follow." Requested withdrawal notifications. |
+| 07 | Dinda Maharani | mhrdinda23@gmail.com | `GDRS...3DOR` | Signed in / created a session. Rated 3/5, clarity 3/5 — lowest overall score. **"It took me a moment to understand the relationship between pockets and split rules."** Requested clearer explanations of pockets. |
+| 08 | Bagas Saputra | _(not provided)_ | `GDJG...JRSS` | Signed in, created a split rule, withdrew from a pocket. Rated 4/5 and 4/5. **"The terminology was slightly confusing at first, but I figured it out."** |
+| 09 | Ayu Lestari | _(not provided)_ | `GAJT...VU45` | Signed in, created a split rule. Rated 5/5 and 5/5. "No major confusion during the flow." Requested a mobile app. |
+| 10 | Yoga Pranata | _(not provided)_ | `GDBA...55A5` | Explored without completing the flow. Rated 4/5, clarity 3/5. **"I wanted more context about what happens after creating a rule."** Requested more detailed rule previews. |
+| 11 | Intan Permata | _(not provided)_ | `GAUN...ND7I` | Signed in, created a split rule. Rated 5/5 and 5/5. Requested scheduled payments. |
+
+**11 form responses** collected between 2026-07-16 and 2026-08-23 via the [in-app feedback form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform). Full per-response detail and aggregate scores: [USER_FEEDBACK.md](USER_FEEDBACK.md).
 
 ### Feedback Implementation
 
-| User ID | Name | Email | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
-|---|---|---|---|---|---|---|
-| 01 | Ahmad Juan | _(not provided)_ | [`GDLY...NNQJ`](https://stellar.expert/explorer/testnet/account/GDLYI4DUXPTQVKIBME7LCUDJUGXUFYYPK5PICFHDX35TDUPSPXSONNQJ) | Positive rating, no friction or feature request submitted | _None yet — nothing actionable reported_ | — |
+| User ID | Name | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
+|---|---|---|---|---|---|
+| 03 | Salsabila Putri | `GDQQ...RBVU` | "I wasn't immediately sure what a pocket represented." | Defined "pocket" where it first appears — a callout in the onboarding modal and a mode-aware explainer line at the top of the rule builder | [`8210381`](https://github.com/artomily/xflame/commit/8210381) |
+| 07 | Dinda Maharani | `GDRS...3DOR` | "It took me a moment to understand the relationship between pockets and split rules." | Same fix — the explainer states the pocket↔rule relationship directly instead of leaving it to be inferred | [`8210381`](https://github.com/artomily/xflame/commit/8210381) |
+| 08 | Bagas Saputra | `GDJG...JRSS` | "The terminology was slightly confusing at first, but I figured it out." | Same fix — terminology is now defined in-product rather than worked out from the inputs | [`8210381`](https://github.com/artomily/xflame/commit/8210381) |
+| 05 | Arjun Sharma | `GAER...3BXF` | "I wasn't completely sure how the split rule would work before actually creating one." | Live split preview moved into the rule builder — a 100 XLM sample breakdown renders as soon as the rule is valid, before saving | [`8a071a3`](https://github.com/artomily/xflame/commit/8a071a3) |
+| 10 | Yoga Pranata | `GDBA...55A5` | "I wanted more context about what happens after creating a rule." | Same fix — plus explicit "Preview only — nothing is saved or sent until you save the rule" copy | [`8a071a3`](https://github.com/artomily/xflame/commit/8a071a3) |
 
 ### Improvement Summary
 
-No shipped improvement is tied to a specific real-user response yet — the one response collected so far (#01) didn't flag a problem or request a feature. In the informal testing that led up to launching the form, we shipped changes aimed at exactly the kind of first-run confusion the form is designed to catch:
+Two problems accounted for five of the eleven responses, and they were the
+two that cost us completions:
 
-- [`fa4394a`](https://github.com/artomily/xflame/commit/fa4394a) — wired up Vercel Analytics and the in-app feedback link, so real usage and friction could start being measured at all.
-- [`b1208ad`](https://github.com/artomily/xflame/commit/b1208ad) — fixed the feedback link, which had been pointing at a placeholder (`forms.gle/REPLACE_ME`) instead of the real form.
-- [`385804e`](https://github.com/artomily/xflame/commit/385804e) — added a first-run onboarding modal and an in-dashboard checklist (sign in → save a rule → deposit), targeting the most common early-user confusion: not knowing what to do first in a split-vault UI.
+**1. "Pocket" was never defined (3 responses — #03, #07, #08).** The word
+carried the whole mental model of the product but appeared only as an input
+placeholder. [`8210381`](https://github.com/artomily/xflame/commit/8210381)
+defines it in the onboarding modal and again at the top of the rule builder,
+with the wording switching between Fixed and Goal mode so it describes the
+rule the user is actually building.
 
-This section will grow with real "reported issue → shipped fix → commit" rows as more of the 10+ testers come in.
+**2. Nothing showed what a rule would do until after it was saved (2 responses
+— #05, #10).** A live preview existed, but only inside the deposit card, which
+is gated behind having saved a rule — so the people who needed it most never
+reached it. Both respondents who abandoned the flow named this, and neither
+completed it.
+[`8a071a3`](https://github.com/artomily/xflame/commit/8a071a3) renders the same
+breakdown against a 100 XLM sample directly in the rule builder, as soon as the
+rule is valid.
+
+The signal was consistent: the three lowest clarity scores (3/5) belong to #05,
+#07, and #10 — exactly the people who raised these two issues — and the only
+respondent who said they would not use the app (#05) is also the only one who
+never got past the rule builder.
+
+Earlier work that set this up:
+
+- [`fa4394a`](https://github.com/artomily/xflame/commit/fa4394a) — wired up Vercel Analytics and the in-app feedback link, so real usage and friction could be measured at all.
+- [`b1208ad`](https://github.com/artomily/xflame/commit/b1208ad) — fixed the feedback link, which had been pointing at a placeholder (`forms.gle/REPLACE_ME`).
+- [`385804e`](https://github.com/artomily/xflame/commit/385804e) — added the first-run onboarding modal and in-dashboard checklist that the fixes above build on.
 
 ### Screenshots
 

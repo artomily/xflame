@@ -1,8 +1,12 @@
 import { useState } from "react";
 import type { Tab } from "./App";
 import type { VaultState } from "./useVault";
-import { toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
+import { computeSplit, toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
 import { FEEDBACK_FORM_URL } from "./config";
+
+// Two testers abandoned the flow because nothing showed what a rule would
+// actually do until after it was saved. Preview against a round sample amount.
+const SAMPLE_XLM = "100";
 
 export default function Split({ vault, onNavigate }: { vault: VaultState; onNavigate?: (t: Tab) => void }) {
   const {
@@ -16,8 +20,21 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
 
   const unfunded = session !== null && walletBalance === 0n;
 
+  const [copied, setCopied] = useState(false);
+  async function copyAddress() {
+    if (!session) return;
+    try {
+      await navigator.clipboard.writeText(session.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard can be blocked (insecure origin, denied permission) — the
+      // address is still readable and selectable in the link above.
+    }
+  }
+
   return (
-    <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-5xl lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-6">
+    <div className="flex w-full max-w-md flex-col gap-4 lg:mx-auto lg:grid lg:max-w-[1600px] lg:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] lg:items-start lg:gap-5 xl:gap-6">
       {!deployed && (
         <div className="rounded-xl border border-brand-soft/40 bg-brand-soft/10 px-4 py-3 text-center text-xs text-ink-muted lg:col-span-2">
           Preview mode — design your split now. Deploy the splitter and set{" "}
@@ -41,15 +58,40 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
 
       {/* Sign in */}
       {session ? (
-        <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-            <span className="font-mono text-xs text-ink-muted">{sessionLabel}</span>
-          </span>
-          <button type="button" onClick={signOut}
-            className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
-            Sign out
-          </button>
+        <div className="flex flex-col gap-2 rounded-xl border border-edge bg-surface px-4 py-2.5">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
+              <span className="font-mono text-xs text-ink-muted">{sessionLabel}</span>
+            </span>
+            <button type="button" onClick={signOut}
+              className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
+              Sign out
+            </button>
+          </div>
+
+          {/* Pockets are stored per address, and the demo keypair is cached per
+              browser origin — so the same email can resolve to a different
+              account elsewhere. Show which one is actually in use. */}
+          <div className="flex items-center gap-2 border-t border-edge pt-2">
+            <span className="shrink-0 text-[11px] text-ink-muted">Account</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/account/${session.address}`}
+              target="_blank"
+              rel="noreferrer"
+              title={session.address}
+              className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink underline decoration-edge underline-offset-2 hover:decoration-ink"
+            >
+              {session.address.slice(0, 8)}…{session.address.slice(-8)}
+            </a>
+            <button
+              type="button"
+              onClick={copyAddress}
+              className="shrink-0 rounded-md border border-edge px-2 py-0.5 text-[11px] font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5 rounded-xl border border-edge bg-surface p-4">
@@ -101,6 +143,12 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
             ))}
           </div>
         </div>
+
+        <p className="text-xs text-ink-muted">
+          {mode === "fixed"
+            ? "Each pocket is a named bucket in your vault. Every deposit is divided between them by these percentages."
+            : "Each goal is a pocket with a target. Deposits fill them top to bottom; once all targets are met, the rest lands in your overflow pocket."}
+        </p>
 
         {mode === "fixed" ? (
           <>
@@ -156,6 +204,37 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
             </div>
           </>
         )}
+
+        {ruleValid && (() => {
+          const sample = computeSplit(mode, fixed, goals, overflow, toStroops(SAMPLE_XLM), {});
+          const entries = Object.entries(sample).filter(([, v]) => v > 0n);
+          if (entries.length === 0) return null;
+          return (
+            <div className="flex flex-col gap-2 rounded-lg bg-canvas p-3">
+              <p className="text-xs text-ink-muted">
+                A {SAMPLE_XLM} XLM deposit would split like this:
+              </p>
+              {entries.map(([pocket, v]) => {
+                const total = toStroops(SAMPLE_XLM);
+                const frac = total > 0n ? Number((v * 1000n) / total) / 10 : 0;
+                return (
+                  <div key={pocket} className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-medium text-ink">{pocket}</span>
+                      <span className="font-mono tabular-nums text-ink-muted">{toXlm(v)} XLM</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-mid">
+                      <div className="h-full rounded-full bg-brand" style={{ width: `${frac}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-[11px] text-ink-muted">
+                Preview only — nothing is saved or sent until you save the rule.
+              </p>
+            </div>
+          );
+        })()}
 
         <button type="button" onClick={saveRule} disabled={!ruleValid || !deployed || !session || busy === "rule"}
           className="rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 const STEPS = [
   { n: "1", title: "Sign in", body: "Email demo account or Freighter — no seed phrase to write down." },
-  { n: "2", title: "Save a split rule", body: "Fixed percentages or priority-ordered goals. Set it once." },
+  { n: "2", title: "Save a split rule", body: "A rule names your pockets and decides how much of each deposit goes to each one — fixed percentages, or goals filled in priority order." },
   { n: "3", title: "Deposit — watch it split", body: "Every deposit divides across your pockets on-chain, instantly." },
 ];
 
@@ -75,6 +75,13 @@ export default function OnboardingModal({ onClose }: { onClose: () => void }) {
           </h2>
           <p className="text-sm text-ink-muted">
             Testnet only — no real funds are at risk.
+          </p>
+          <p className="mt-1 rounded-lg bg-surface-mid px-3 py-2 text-xs text-ink-muted">
+            <span className="font-semibold text-ink">A pocket</span> is a named bucket inside your
+            vault — like <span className="font-medium text-ink">savings</span>,{" "}
+            <span className="font-medium text-ink">dca</span>, or{" "}
+            <span className="font-medium text-ink">cash</span>. Your split rule decides how much of
+            every deposit lands in each one.
           </p>
         </div>
 
