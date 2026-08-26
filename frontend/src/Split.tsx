@@ -20,6 +20,19 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
 
   const unfunded = session !== null && walletBalance === 0n;
 
+  const [copied, setCopied] = useState(false);
+  async function copyAddress() {
+    if (!session) return;
+    try {
+      await navigator.clipboard.writeText(session.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard can be blocked (insecure origin, denied permission) — the
+      // address is still readable and selectable in the link above.
+    }
+  }
+
   return (
     <div className="flex w-full max-w-md flex-col gap-4 lg:mx-auto lg:grid lg:max-w-[1600px] lg:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] lg:items-start lg:gap-5 xl:gap-6">
       {!deployed && (
@@ -45,15 +58,40 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
 
       {/* Sign in */}
       {session ? (
-        <div className="flex items-center justify-between rounded-xl border border-edge bg-surface px-4 py-2.5">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
-            <span className="font-mono text-xs text-ink-muted">{sessionLabel}</span>
-          </span>
-          <button type="button" onClick={signOut}
-            className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
-            Sign out
-          </button>
+        <div className="flex flex-col gap-2 rounded-xl border border-edge bg-surface px-4 py-2.5">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
+              <span className="font-mono text-xs text-ink-muted">{sessionLabel}</span>
+            </span>
+            <button type="button" onClick={signOut}
+              className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink">
+              Sign out
+            </button>
+          </div>
+
+          {/* Pockets are stored per address, and the demo keypair is cached per
+              browser origin — so the same email can resolve to a different
+              account elsewhere. Show which one is actually in use. */}
+          <div className="flex items-center gap-2 border-t border-edge pt-2">
+            <span className="shrink-0 text-[11px] text-ink-muted">Account</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/account/${session.address}`}
+              target="_blank"
+              rel="noreferrer"
+              title={session.address}
+              className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink underline decoration-edge underline-offset-2 hover:decoration-ink"
+            >
+              {session.address.slice(0, 8)}…{session.address.slice(-8)}
+            </a>
+            <button
+              type="button"
+              onClick={copyAddress}
+              className="shrink-0 rounded-md border border-edge px-2 py-0.5 text-[11px] font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5 rounded-xl border border-edge bg-surface p-4">
