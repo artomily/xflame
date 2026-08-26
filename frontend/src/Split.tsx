@@ -1,8 +1,12 @@
 import { useState } from "react";
 import type { Tab } from "./App";
 import type { VaultState } from "./useVault";
-import { toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
+import { computeSplit, toStroops, toXlm, type GoalRow, type Mode } from "./lib/splitMath";
 import { FEEDBACK_FORM_URL } from "./config";
+
+// Two testers abandoned the flow because nothing showed what a rule would
+// actually do until after it was saved. Preview against a round sample amount.
+const SAMPLE_XLM = "100";
 
 export default function Split({ vault, onNavigate }: { vault: VaultState; onNavigate?: (t: Tab) => void }) {
   const {
@@ -162,6 +166,37 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
             </div>
           </>
         )}
+
+        {ruleValid && (() => {
+          const sample = computeSplit(mode, fixed, goals, overflow, toStroops(SAMPLE_XLM), {});
+          const entries = Object.entries(sample).filter(([, v]) => v > 0n);
+          if (entries.length === 0) return null;
+          return (
+            <div className="flex flex-col gap-2 rounded-lg bg-canvas p-3">
+              <p className="text-xs text-ink-muted">
+                A {SAMPLE_XLM} XLM deposit would split like this:
+              </p>
+              {entries.map(([pocket, v]) => {
+                const total = toStroops(SAMPLE_XLM);
+                const frac = total > 0n ? Number((v * 1000n) / total) / 10 : 0;
+                return (
+                  <div key={pocket} className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-medium text-ink">{pocket}</span>
+                      <span className="font-mono tabular-nums text-ink-muted">{toXlm(v)} XLM</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-mid">
+                      <div className="h-full rounded-full bg-brand" style={{ width: `${frac}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-[11px] text-ink-muted">
+                Preview only — nothing is saved or sent until you save the rule.
+              </p>
+            </div>
+          );
+        })()}
 
         <button type="button" onClick={saveRule} disabled={!ruleValid || !deployed || !session || busy === "rule"}
           className="rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
