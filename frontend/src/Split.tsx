@@ -21,7 +21,7 @@ export default function Split({ vault, onNavigate }: { vault: VaultState; onNavi
   const unfunded = session !== null && walletBalance === 0n;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4 lg:max-w-5xl lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-6">
+    <div className="flex w-full max-w-md flex-col gap-4 lg:mx-auto lg:grid lg:max-w-[1600px] lg:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] lg:items-start lg:gap-5 xl:gap-6">
       {!deployed && (
         <div className="rounded-xl border border-brand-soft/40 bg-brand-soft/10 px-4 py-3 text-center text-xs text-ink-muted lg:col-span-2">
           Preview mode — design your split now. Deploy the splitter and set{" "}
