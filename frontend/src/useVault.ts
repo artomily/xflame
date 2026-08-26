@@ -88,11 +88,35 @@ export function useVault() {
     }
   }
 
+  /**
+   * Load the rule this address already has on-chain and rebuild the builder
+   * from it. Without this the form silently shows its defaults over a saved
+   * rule, so the vault looks empty even though `set_rule` succeeded.
+   */
   async function checkExistingRule(s: WalletSession) {
     if (!deployed) return;
     try {
       const tx = await createSplitterClient(s).rule({ user: s.address });
-      setRuleSaved(tx.result !== null && tx.result !== undefined);
+      const rule = tx.result as SplitRule | null | undefined;
+      if (!rule) {
+        setRuleSaved(false);
+        return;
+      }
+      setRuleSaved(true);
+      if (rule.tag === "Fixed") {
+        const rows = rule.values[0];
+        setMode("fixed");
+        if (rows.length > 0) {
+          setFixed(rows.map((a) => ({ pocket: a.pocket, pct: String(a.bps / 100) })));
+        }
+      } else {
+        const [entries, overflowPocket] = rule.values;
+        setMode("goal");
+        if (entries.length > 0) {
+          setGoals(entries.map((g) => ({ pocket: g.pocket, target: toXlm(g.target) })));
+        }
+        if (overflowPocket) setOverflow(overflowPocket);
+      }
     } catch {
       setRuleSaved(false);
     }
@@ -104,7 +128,7 @@ export function useVault() {
     try {
       const s = await signInWithEmailDemo(email);
       setSession(s);
-      await Promise.all([checkExistingRule(s), refreshBalance(s.address)]);
+      await Promise.all([checkExistingRule(s), refreshBalance(s.address), loadPockets(s.address, s)]);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
@@ -113,7 +137,7 @@ export function useVault() {
     try {
       const s = await connectFreighterSession();
       setSession(s);
-      await Promise.all([checkExistingRule(s), refreshBalance(s.address)]);
+      await Promise.all([checkExistingRule(s), refreshBalance(s.address), loadPockets(s.address, s)]);
     } catch (err) { fail(err); } finally { setSigningIn(false); }
   }
 
@@ -157,11 +181,11 @@ export function useVault() {
     } catch (e) { fail(e); } finally { setBusy(""); }
   }
 
-  async function loadPockets(addr = session?.address) {
-    if (!session || !addr) return;
+  async function loadPockets(addr = session?.address, s = session) {
+    if (!s || !addr) return;
     setBusy("load");
     try {
-      const tx = await createSplitterClient(session).pockets({ user: addr });
+      const tx = await createSplitterClient(s).pockets({ user: addr });
       // The SDK decodes a Soroban Map as an array of [key, value] tuples at
       // runtime, not a native JS Map, despite the `Map<string, i128>` TS type.
       const entries = tx.result as unknown as [string, bigint][];
