@@ -12,7 +12,7 @@ the live demo at
 
 Raw responses (name, email, wallet, ratings, feedback): [xflame feedback — Google Sheet](https://docs.google.com/spreadsheets/d/1Cdb4WKMacN9OuHMsRmupGzkDJZyV-BZ9sLE5zwJjt5E/edit?usp=sharing)
 
-**11 form responses**, submitted between 2026-07-16 and 2026-08-23.
+**12 form responses**, submitted between 2026-07-16 and 2026-08-27.
 
 | # | Name | Wallet (truncated) | Action taken (self-reported) |
 |---|---|---|---|
@@ -27,34 +27,35 @@ Raw responses (name, email, wallet, ratings, feedback): [xflame feedback — Goo
 | 9 | Ayu Lestari | `GAJT...VU45` | Signed in, created a split rule |
 | 10 | Yoga Pranata | `GDBA...55A5` | Explored only, did not complete flow |
 | 11 | Intan Permata | `GAUN...ND7I` | Signed in, created a split rule |
+| 12 | Karman Singh Chandhok | `GAVB...CH6N` | Signed in / created a session |
 
 ## Feedback summary
 
-_Aggregate from all 11 form responses._
+_Aggregate from all 12 form responses._
 
 | Metric | Result |
 |---|---|
-| Avg. clarity of first split rule setup (1–5) | `4.3` (n=11) |
-| Avg. overall product rating (1–5) | `4.4` (n=11) |
-| % who said they'd actually use it for remittance income | `91%` (10/11) |
-| Most common friction point | Pocket vs. split-rule relationship unclear (3/11) |
-| Most requested feature | Onboarding/tutorial improvements (3/11) |
-| Agreed to follow-up contact | `8` yes, `2` no, `1` blank |
+| Avg. clarity of first split rule setup (1–5) | `4.3` (n=12) |
+| Avg. overall product rating (1–5) | `4.3` (n=12) |
+| % who said they'd actually use it for remittance income | `92%` (11/12) |
+| Most common friction point | Pocket vs. split-rule relationship unclear (3/12) |
+| Most requested feature | Onboarding/tutorial improvements (3/12) |
+| Agreed to follow-up contact | `9` yes, `2` no, `1` blank |
 
 ### What went well
 
-- Overall rating averages 4.4/5, with five perfect scores.
-- 10 of 11 said they'd "definitely" use xflame for receiving money from family or friends.
+- Overall rating averages 4.3/5, with five perfect scores.
+- 11 of 12 said they'd "definitely" use xflame for receiving money from family or friends.
 - Four respondents reported no confusion at all: _"The flow was straightforward"_,
   _"clear and I didn't get stuck anywhere"_, _"The withdrawal flow was easy to follow"_.
 
 ### What needs to improve
 
-1. **Pockets aren't self-explanatory (3/11 — the single biggest issue).**
+1. **Pockets aren't self-explanatory (3/12 — the single biggest issue).**
    - _"I wasn't immediately sure what a pocket represented."_ — Salsabila Putri
    - _"It took me a moment to understand the relationship between pockets and split rules."_ — Dinda Maharani
    - _"The terminology was slightly confusing at first, but I figured it out."_ — Bagas Saputra
-2. **No preview of what a rule will actually do (2/11).** Both respondents who bailed
+2. **No preview of what a rule will actually do (2/12).** Both respondents who bailed
    before completing the flow named this.
    - _"I wasn't completely sure how the split rule would work before actually creating one."_ — Arjun Sharma
    - _"I wanted more context about what happens after creating a rule."_ — Yoga Pranata

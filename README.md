@@ -111,8 +111,9 @@ Verified on-chain: depositing 100 XLM against the Fixed 50/30/20 rule above prod
 | 09 | Ayu Lestari | _(not provided)_ | `GAJT...VU45` | Signed in, created a split rule. Rated 5/5 and 5/5. "No major confusion during the flow." Requested a mobile app. |
 | 10 | Yoga Pranata | _(not provided)_ | `GDBA...55A5` | Explored without completing the flow. Rated 4/5, clarity 3/5. **"I wanted more context about what happens after creating a rule."** Requested more detailed rule previews. |
 | 11 | Intan Permata | _(not provided)_ | `GAUN...ND7I` | Signed in, created a split rule. Rated 5/5 and 5/5. Requested scheduled payments. |
+| 12 | Karman Singh Chandhok | chandhokkarmansingh@gmail.com | `GAVB...CH6N` | Signed in / created a session. Rated 4/5, first-rule clarity 5/5. Would "definitely" use it for family remittance income. No friction or feature request submitted. |
 
-**11 form responses** collected between 2026-07-16 and 2026-08-23 via the [in-app feedback form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform). Full per-response detail and aggregate scores: [USER_FEEDBACK.md](USER_FEEDBACK.md).
+**12 form responses** collected between 2026-07-16 and 2026-08-27 via the [in-app feedback form](https://docs.google.com/forms/d/e/1FAIpQLSc2FAJLJJ4v8vfw_oEIeyJlc52wD3QvtKq0Q_Gkn6egfb_RBQ/viewform). Full per-response detail and aggregate scores: [USER_FEEDBACK.md](USER_FEEDBACK.md).
 
 ### Feedback Implementation
 
